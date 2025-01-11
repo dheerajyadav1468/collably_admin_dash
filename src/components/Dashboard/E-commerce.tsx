@@ -5,8 +5,8 @@ import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableOne";
 import MapOne from "../Maps/MapOne";
-import DataStatsOne from "@/components/DataStats/DataStatsOne";
-import ChartOne from "@/components/Charts/ChartOne";
+import DataStatsOne from "../components/DataStats/DataStatsOne";
+import ChartOne from "../components/Charts/ChartOne";
 
 const ECommerce: React.FC = () => {
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import TableFour from "@/components/Tables/TableFour";
+import TableFour from "../components/Tables/TableFour";
 
 const ProfileUser = () => {
   const searchParams = useSearchParams();

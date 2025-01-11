@@ -1,7 +1,7 @@
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import Breadcrumb from "../components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLaout";
-import ProfileBrand from "@/components/ProfileBox/brandprofile";
+import DefaultLayout from "../components/Layouts/DefaultLaout";
+import ProfileBrand from "../components/ProfileBox/brandprofile";
 
 export const metadata: Metadata = {
   title: "Collably Profile Page | Collably - Collably Dashboard Kit",

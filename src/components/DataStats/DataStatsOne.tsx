@@ -1,5 +1,5 @@
 import React from "react";
-import { dataStats } from "@/types/dataStats";
+import { dataStats } from "../types/dataStats";
 
 const dataStatsList = [
   {

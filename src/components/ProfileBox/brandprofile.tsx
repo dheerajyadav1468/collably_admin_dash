@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import TableTwo from "@/components/Tables/TableTwo";
+import TableTwo from "../components/Tables/TableTwo";
 
 const ProfileBrand = () => {
   const searchParams = useSearchParams();

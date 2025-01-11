@@ -1,18 +1,18 @@
 "use client";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import CheckboxFive from "@/components/FormElements/Checkboxes/CheckboxFive";
-import CheckboxFour from "@/components/FormElements/Checkboxes/CheckboxFour";
-import CheckboxOne from "@/components/FormElements/Checkboxes/CheckboxOne";
-import CheckboxThree from "@/components/FormElements/Checkboxes/CheckboxThree";
-import CheckboxTwo from "@/components/FormElements/Checkboxes/CheckboxTwo";
-import SwitcherFour from "@/components/FormElements/Switchers/SwitcherFour";
-import SwitcherOne from "@/components/FormElements/Switchers/SwitcherOne";
-import SwitcherThree from "@/components/FormElements/Switchers/SwitcherThree";
-import SwitcherTwo from "@/components/FormElements/Switchers/SwitcherTwo";
-import DatePickerTwo from "@/components/FormElements/DatePicker/DatePickerTwo";
-import DatePickerOne from "@/components/FormElements/DatePicker/DatePickerOne";
-import MultiSelect from "@/components/FormElements/MultiSelect";
-import SelectGroupTwo from "@/components/FormElements/SelectGroup/SelectGroupTwo";
+import Breadcrumb from "../components/Breadcrumbs/Breadcrumb";
+import CheckboxFive from "../components/FormElements/Checkboxes/CheckboxFive";
+import CheckboxFour from "../components/FormElements/Checkboxes/CheckboxFour";
+import CheckboxOne from "../components/FormElements/Checkboxes/CheckboxOne";
+import CheckboxThree from "../components/FormElements/Checkboxes/CheckboxThree";
+import CheckboxTwo from "../components/FormElements/Checkboxes/CheckboxTwo";
+import SwitcherFour from "../components/FormElements/Switchers/SwitcherFour";
+import SwitcherOne from "../components/FormElements/Switchers/SwitcherOne";
+import SwitcherThree from "../components/FormElements/Switchers/SwitcherThree";
+import SwitcherTwo from "../components/FormElements/Switchers/SwitcherTwo";
+import DatePickerTwo from "../components/FormElements/DatePicker/DatePickerTwo";
+import DatePickerOne from "../components/FormElements/DatePicker/DatePickerOne";
+import MultiSelect from "../components/FormElements/MultiSelect";
+import SelectGroupTwo from "../components/FormElements/SelectGroup/SelectGroupTwo";
 
 const FormElements = () => {
   return (
