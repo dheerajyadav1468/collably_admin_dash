@@ -1,8 +1,8 @@
-import Breadcrumb from "../components/Breadcrumbs/Breadcrumb";
-import TableOne from "../components/Tables/TableOne";
+import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
+import TableOne from "../../components/Tables/TableOne";
 
 import { Metadata } from "next";
-import DefaultLayout from "../components/Layouts/DefaultLaout";
+import DefaultLayout from "../../components/Layouts/DefaultLaout";
 
 export const metadata: Metadata = {
   title: "Collably Tables Page | Collably - Collably Dashboard Kit",
