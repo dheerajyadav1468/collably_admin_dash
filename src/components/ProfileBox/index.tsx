@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
-import { CREATOR } from "@/types/creator";
+import { CREATOR } from "../../types/creator";
 
 const ProfileBox = () => {
   const [creator, setCreator] = useState<CREATOR | null>(null);
