@@ -1,7 +1,7 @@
 'use client'; 
 
 
-import { BRAND } from "../types/brand";
+import { BRAND } from "../../types/brand";
 import Image from "next/image";
 import { useRouter } from "next/navigation";  
 

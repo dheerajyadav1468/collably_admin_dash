@@ -1,6 +1,6 @@
 'use client'; 
 
-import { CREATOR } from "../types/creator";
+import { CREATOR } from "../../types/creator";
 import Image from "next/image";
 import { useRouter } from "next/navigation";  
 

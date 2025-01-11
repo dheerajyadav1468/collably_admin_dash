@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { purchaseProduct } from "../types/purchaseProduct";
+import { purchaseProduct } from "../../types/purchaseProduct";
 import { useSearchParams } from 'next/navigation';
 
 
