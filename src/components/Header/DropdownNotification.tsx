@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import ClickOutside from "../components/ClickOutside";
+import ClickOutside from "../../components/ClickOutside";
 import Image from "next/image";
 
 const notificationList = [
