@@ -1,7 +1,7 @@
 import { ApexOptions } from "apexcharts";
 import React from "react";
 import ReactApexChart from "react-apexcharts";
-import DefaultSelectOption from "../components/SelectOption/DefaultSelectOption";
+import DefaultSelectOption from "../../components/SelectOption/DefaultSelectOption";
 
 const ChartOne: React.FC = () => {
   const series = [
