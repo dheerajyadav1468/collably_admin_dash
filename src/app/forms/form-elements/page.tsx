@@ -1,7 +1,7 @@
 import React from "react";
-import FormElements from "../components/FormElements";
+import FormElements from "../../../components/FormElements";
 import { Metadata } from "next";
-import DefaultLayout from "../components/Layouts/DefaultLaout";
+import DefaultLayout from "../../../components/Layouts/DefaultLaout";
 
 export const metadata: Metadata = {
   title: "Collably Form Elements Page | Collably - Collably Dashboard Kit",
