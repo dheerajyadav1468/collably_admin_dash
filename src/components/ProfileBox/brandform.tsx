@@ -1,55 +1,57 @@
-"use client"; // Ensure this component runs on the client side
+"use client";
 
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../app/store/store';
+import { createBrand } from '../../app/store/brandSlice';
 
-type BrandOnboardingFormProps = {
-  onSubmit: (formData: BrandFormData) => void;
-};
-
-type BrandFormData = {
-  brandName: string;
-  brandLogo: File | null;
-  brandDescription: string;
-  brandCategory: string;
-  contactEmail: string;
-  brandWebsite: string;
-  brandPhone: string;
-  socialMediaLinks: string;
-  gstNumber: string;
-};
-
-const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState<BrandFormData>({
+const BrandOnboardingForm: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const [formData, setFormData] = useState({
     brandName: '',
-    brandLogo: null,
     brandDescription: '',
     brandCategory: '',
     contactEmail: '',
     brandWebsite: '',
-    brandPhone: '',
-    socialMediaLinks: '',
+    brandPhoneNumber: '',
+    socialMediaLinks: {
+      facebook: '',
+      twitter: '',
+      instagram: '',
+      linkedin: '',
+    },
     gstNumber: '',
+    password: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value
-    }));
+    if (name.startsWith('socialMediaLinks.')) {
+      const socialMedia = name.split('.')[1];
+      setFormData(prevData => ({
+        ...prevData,
+        socialMediaLinks: {
+          ...prevData.socialMediaLinks,
+          [socialMedia]: value,
+        },
+      }));
+    } else {
+      setFormData(prevData => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setFormData((prevData) => ({
-      ...prevData,
-      brandLogo: file,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    try {
+      await dispatch(createBrand(formData)).unwrap();
+      alert('Brand created successfully!');
+    } catch (error) {
+      console.error('Failed to create brand:', error);
+      alert('Failed to create brand. Please try again.');
+    }
   };
 
   return (
@@ -58,7 +60,6 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Brand Name */}
           <div>
             <label htmlFor="brandName" className="block text-lg font-medium text-dark dark:text-white mb-2">Name</label>
             <input
@@ -67,26 +68,12 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="brandName"
               value={formData.brandName}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none  bg-dark focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none bg-dark focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter your brand name"
               required
             />
           </div>
 
-          {/* Brand Logo */}
-          <div>
-            <label htmlFor="brandLogo" className="block text-lg font-medium text-dark dark:text-white mb-2">Logo</label>
-            <input
-              type="file"
-              id="brandLogo"
-              name="brandLogo"
-              onChange={handleFileChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              accept="image/*"
-            />
-          </div>
-
-          {/* Brand Description */}
           <div className="col-span-2">
             <label htmlFor="brandDescription" className="block text-lg font-medium text-dark dark:text-white mb-2">Description</label>
             <textarea
@@ -94,13 +81,12 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="brandDescription"
               value={formData.brandDescription}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Describe your brand"
               required
             />
           </div>
 
-          {/* Brand Category */}
           <div>
             <label htmlFor="brandCategory" className="block text-lg font-medium text-dark dark:text-white mb-2">Product Category</label>
             <select
@@ -108,7 +94,7 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="brandCategory"
               value={formData.brandCategory}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             >
               <option value="">Select Category</option>
@@ -121,7 +107,6 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
             </select>
           </div>
 
-          {/* Contact Email */}
           <div>
             <label htmlFor="contactEmail" className="block text-lg font-medium text-dark dark:text-white mb-2">Email Id</label>
             <input
@@ -130,13 +115,12 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="contactEmail"
               value={formData.contactEmail}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter contact email"
               required
             />
           </div>
 
-          {/* Brand Website */}
           <div>
             <label htmlFor="brandWebsite" className="block text-lg font-medium text-dark dark:text-white mb-2">Website URL</label>
             <input
@@ -145,40 +129,77 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="brandWebsite"
               value={formData.brandWebsite}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="https://www.example.com"
               required
             />
           </div>
 
-          {/* Brand Phone */}
           <div>
-            <label htmlFor="brandPhone" className="block text-lg font-medium text-dark dark:text-white mb-2">Contact Number</label>
+            <label htmlFor="brandPhoneNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">Contact Number</label>
             <input
               type="tel"
-              id="brandPhone"
-              name="brandPhone"
-              value={formData.brandPhone}
+              id="brandPhoneNumber"
+              name="brandPhoneNumber"
+              value={formData.brandPhoneNumber}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter phone number"
             />
           </div>
 
-          {/* Social Media Links */}
-          <div className="col-span-2">
-            <label htmlFor="socialMediaLinks" className="block text-lg font-medium text-dark dark:text-white mb-2">Social Media Links</label>
-            <textarea
-              id="socialMediaLinks"
-              name="socialMediaLinks"
-              value={formData.socialMediaLinks}
+          <div>
+            <label htmlFor="socialMediaLinks.facebook" className="block text-lg font-medium text-dark dark:text-white mb-2">Facebook</label>
+            <input
+              type="url"
+              id="socialMediaLinks.facebook"
+              name="socialMediaLinks.facebook"
+              value={formData.socialMediaLinks.facebook}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Paste social media links"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="https://facebook.com/yourbrand"
             />
           </div>
 
-          {/* GST Number */}
+          <div>
+            <label htmlFor="socialMediaLinks.twitter" className="block text-lg font-medium text-dark dark:text-white mb-2">Twitter</label>
+            <input
+              type="url"
+              id="socialMediaLinks.twitter"
+              name="socialMediaLinks.twitter"
+              value={formData.socialMediaLinks.twitter}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="https://twitter.com/yourbrand"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="socialMediaLinks.instagram" className="block text-lg font-medium text-dark dark:text-white mb-2">Instagram</label>
+            <input
+              type="url"
+              id="socialMediaLinks.instagram"
+              name="socialMediaLinks.instagram"
+              value={formData.socialMediaLinks.instagram}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="https://instagram.com/yourbrand"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="socialMediaLinks.linkedin" className="block text-lg font-medium text-dark dark:text-white mb-2">LinkedIn</label>
+            <input
+              type="url"
+              id="socialMediaLinks.linkedin"
+              name="socialMediaLinks.linkedin"
+              value={formData.socialMediaLinks.linkedin}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="https://linkedin.com/company/yourbrand"
+            />
+          </div>
+
           <div>
             <label htmlFor="gstNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">GST Number</label>
             <input
@@ -187,13 +208,26 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
               name="gstNumber"
               value={formData.gstNumber}
               onChange={handleChange}
-              className="w-[60rem]  p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter GST number"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter password"
+              required
             />
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex justify-center mt-6">
           <button
             type="submit"
@@ -208,3 +242,4 @@ const BrandOnboardingForm: React.FC<BrandOnboardingFormProps> = ({ onSubmit }) =
 };
 
 export default BrandOnboardingForm;
+

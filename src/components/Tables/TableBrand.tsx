@@ -3,7 +3,10 @@
 
 import { BRAND } from "../../types/brand";
 import Image from "next/image";
-import { useRouter } from "next/navigation";  
+import { useRouter } from "next/navigation";
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store/store'  
 
 const brandData: BRAND[] = [
   {
@@ -17,13 +20,15 @@ const brandData: BRAND[] = [
   
 ];
 
-
-const TableBrand = () => {
-     const router = useRouter();  
+const TableBrand: React.FC = () => {
+  const brands = useSelector((state: RootState) => state.brands.brands);
+  const router = useRouter();  
       
       const handleViewClick = (brandName: string, brandLogo: string, brandProducts: number, brandRevenues: string, brandSales: number) => {
         router.push(`/profileBrand?brand=${encodeURIComponent(brandName)}&logo=${encodeURIComponent(brandLogo)}&products=${encodeURIComponent(brandProducts)}&revenues=${encodeURIComponent(brandRevenues)}&sales=${encodeURIComponent(brandSales)}`);
     };
+// const TableBrand = () => {
+     
   return (
     <div className="rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
       <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">
@@ -155,6 +160,7 @@ const TableBrand = () => {
       </div>
     </div>
   );
+// }
 };
 
 export default TableBrand;
