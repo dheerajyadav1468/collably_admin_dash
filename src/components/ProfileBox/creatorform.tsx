@@ -1,4 +1,4 @@
-"use client"; // Ensure this component runs on the client side
+"use client"; 
 import React, { useState } from 'react';
 
 type CreatorOnboardingFormProps = {

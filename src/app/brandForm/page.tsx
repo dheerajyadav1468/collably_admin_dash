@@ -1,4 +1,4 @@
-"use client"; // Ensure this is a client component
+"use client"; 
 
 import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
 import BrandOnboardingForm from "../../components/ProfileBox/brandform";
