@@ -136,7 +136,7 @@ const ProductForm = () => {
               onChange={handleSelectChange}
               options={brandOptions}
               isClearable
-              className="w-full"
+              className="w-full p-2.5 border-2 border-gray-300 rounded-lg focus:outline-none bg-dark focus:ring-2 focus:ring-indigo-500"
               classNamePrefix="react-select"
               placeholder="Select Brand"
             />
