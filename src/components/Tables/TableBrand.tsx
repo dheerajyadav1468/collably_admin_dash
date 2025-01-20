@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../app/store/store";
 import { fetchAllBrands, deleteBrand } from "../../app/store/brandSlice";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 const TableBrand = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -41,9 +43,18 @@ const TableBrand = () => {
 
   return (
     <div className="rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
+      <div className="mb-4 flex items-center justify-between">
       <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">
         Top Brands
       </h4>
+      <Link
+        href="/brandForm"
+        className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+      >
+        <Plus className="h-4 w-4" />
+        Add Brand
+      </Link>
+      </div>
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-stroke dark:border-dark-3">
