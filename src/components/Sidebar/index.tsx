@@ -158,8 +158,8 @@ const menuGroups = [
         label: "Products",
         route: "",
         children: [
-          { label: "Add Products", route: "" },
-          { label: "All Products", route: "" },
+          { label: "Add Products", route: "/productForm" },
+          { label: "All Products", route: "productTable" },
           { label: "Pending Products", route: "" },
           { label: "Categories", route: "" },
           { label: "Brands", route: "" },

@@ -86,7 +86,7 @@ const ProductForm = () => {
   if (productStatus === 'failed') return <div>Error: {productError}</div>;
 
   return (
-    <div className="max-w-5xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
+    <div className="max-w-6xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
       <h4 className="text-3xl font-semibold text-dark dark:text-white mb-6">
         {productId ? 'Update Product' : 'Add New Product'}
       </h4>
@@ -123,7 +123,7 @@ const ProductForm = () => {
               <option value="">Select Brand</option>
               {brands.map((brand: Brand) => (
                 <option key={brand._id} value={brand._id}>
-                  {brand.brandName}
+                  {brand. brandName}
                 </option>
               ))}
             </select>
