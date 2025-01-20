@@ -258,9 +258,7 @@ const BrandForm = () => {
               placeholder="Enter GST number"
             />
           </div>
-        </div>
-
-        <div>
+          <div>
             <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">Password</label>
             <input
               type="password"
@@ -273,6 +271,9 @@ const BrandForm = () => {
               required
             />
           </div>
+        </div>
+
+        
 
         {/* Submit Button */}
         <div className="flex justify-center mt-6">
