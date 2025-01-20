@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchProduct } from "../../app/store/prductSlice"
 import Link from "next/link"
+import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand";
 
 const ProfileProduct = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -31,6 +32,9 @@ const ProfileProduct = () => {
   if (!currentProduct) return <div>No product found</div>
 
   return (
+    <>
+      
+ <DefaultLayoutBrand>
     <div className="p-6 max-w-6xl bg-white dark:bg-gray-dark rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-dark dark:text-white">{currentProduct.productname} - Product Details</h2>
@@ -60,7 +64,7 @@ const ProfileProduct = () => {
         <div>
           <h3 className="text-lg font-semibold mb-2">Product Details</h3>
           <p>
-            <strong>Price:</strong> ${currentProduct.price}
+            <strong>Price:</strong> ₹{currentProduct.price}
           </p>
           <p>
             <strong>Quantity:</strong> {currentProduct.quantity}
@@ -76,6 +80,8 @@ const ProfileProduct = () => {
         </Link>
       </div>
     </div>
+    </DefaultLayoutBrand>
+    </>
   )
 }
 
