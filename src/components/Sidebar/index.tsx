@@ -97,7 +97,7 @@ const menuGroups = [
           </svg>
         ),
         label: "User",
-        route: "/userTable",
+        route: "",
         children: [
           { label: "Active Users", route: "#" },
           { label: "Banned Usrs", route: "#" },
@@ -106,7 +106,8 @@ const menuGroups = [
           {label: "KYC Unverified", route: "#" },
           { label: "KYC Pending", route: "#" },
           { label: "With Balance", route: "#" },
-          { label: "All Users", route: "#" },
+          { label: "All Users", route: "/userTable" },
+          { label: "Add Users", route: "/userForm" },
           { label: "Notification to all", route: "#" },
         ],
       },
