@@ -87,7 +87,7 @@ const BrandForm = () => {
   if (status === 'failed') return <div>Error: {error}</div>;
 
   return (
-    <div className="max-w-5xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
+    <div className="max-w-6xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
       <h4 className="text-3xl font-semibold text-dark dark:text-white mb-6">Brand Onboarding Form</h4>
 
       <form onSubmit={handleSubmit}>

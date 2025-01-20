@@ -12,11 +12,16 @@ const UserTable = () => {
   const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
   const { users, status, error } = useSelector((state: RootState) => state.users)
-  console.log(users);
 
   useEffect(() => {
     dispatch(fetchAllUsers())
   }, [dispatch])
+
+  useEffect(() => {
+    console.log("Users state:", users)
+    console.log("Status:", status)
+    console.log("Error:", error)
+  }, [users, status, error])
 
   const handleViewClick = (userId: string) => {
     router.push(`/profileUser?id=${userId}`)

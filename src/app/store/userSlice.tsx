@@ -53,7 +53,8 @@ export const fetchAllUsers = createAsyncThunk("users/fetchAllUsers", async () =>
     throw new Error("Failed to fetch users")
   }
   const data = await response.json()
-  return data.users || [] // Assuming the API returns an object with a 'users' array
+  console.log("API Response:", data)
+  return data
 })
 
 export const fetchUser = createAsyncThunk("users/fetchUser", async (id: string) => {
@@ -121,9 +122,18 @@ const usersSlice = createSlice({
       .addCase(fetchAllUsers.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(fetchAllUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
+      .addCase(fetchAllUsers.fulfilled, (state, action: PayloadAction<any>) => {
         state.status = "succeeded"
-        state.users = action.payload
+        if (Array.isArray(action.payload)) {
+          state.users = action.payload
+        } else if (action.payload && Array.isArray(action.payload.user)) {
+          state.users = action.payload.user
+        } else if (action.payload && Array.isArray(action.payload.users)) {
+          state.users = action.payload.users
+        } else {
+          console.error("Unexpected API response structure:", action.payload)
+          state.users = []
+        }
         state.error = null
       })
       .addCase(fetchAllUsers.rejected, (state, action) => {
