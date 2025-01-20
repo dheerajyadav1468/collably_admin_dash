@@ -79,7 +79,8 @@ export const updateProduct = createAsyncThunk(
     if (!response.ok) {
       throw new Error("Failed to update product")
     }
-    return await response.json()
+    const updatedProduct = await response.json()
+    return { id, updatedProduct }
   },
 )
 
@@ -95,7 +96,6 @@ const productsSlice = createSlice({
       .addCase(createProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.status = "succeeded"
         state.products.push(action.payload)
-        state.error = null
       })
       .addCase(createProduct.rejected, (state, action) => {
         state.status = "failed"
@@ -107,7 +107,6 @@ const productsSlice = createSlice({
       .addCase(fetchAllProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
         state.status = "succeeded"
         state.products = action.payload
-        state.error = null
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.status = "failed"
@@ -138,14 +137,13 @@ const productsSlice = createSlice({
       .addCase(updateProduct.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(updateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+      .addCase(updateProduct.fulfilled, (state, action: PayloadAction<{ id: string; updatedProduct: Product }>) => {
         state.status = "succeeded"
-        const index = state.products.findIndex((product) => product._id === action.payload._id)
+        const index = state.products.findIndex((product) => product._id === action.payload.id)
         if (index !== -1) {
-          state.products[index] = action.payload
+          state.products[index] = action.payload.updatedProduct
         }
-        state.currentProduct = action.payload
-        state.error = null
+        state.currentProduct = action.payload.updatedProduct
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.status = "failed"
