@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -40,8 +41,11 @@ const LoginForm = () => {
       username === dummyData[role].username &&
       password === dummyData[role].password
     ) {
+      // Set the login flag in localStorage
+      localStorage.setItem("isLoggedIn", "true");
+
       setError(null);
-      router.push('/'); // Redirect to the home page (or any other route)
+      router.push('/'); // Redirect to home page (dashboard)
     } else {
       setError('Invalid username or password');
     }
@@ -50,6 +54,17 @@ const LoginForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-[430px] p-8 bg-white rounded-lg shadow-lg space-y-6">
+        
+        <div className="flex justify-center mb-6">
+          <Image 
+            src="/images/logo/logo-collably.png" 
+            alt="Logo"
+            width={120}  
+            height={40}  
+            className="object-contain"
+          />
+        </div>
+
         <h4 className="text-3xl font-semibold text-dark mb-6">Login</h4>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -111,7 +126,7 @@ const LoginForm = () => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-4 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full py-4 px-6 bg-[#ff0055] text-white rounded-lg hover:bg-[#e6234d] transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               Login
             </button>
