@@ -1,90 +1,98 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../app/store/store';
-import { fetchBrand, updateBrand, createBrand } from '../../app/store/brandSlice';
-import { Brand } from '../../app/store/brandSlice';
-import Modal from './Modal';
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../../app/store/store"
+import { fetchBrand, updateBrand, createBrand } from "../../app/store/brandSlice"
+import type { Brand } from "../../app/store/brandSlice"
+import Modal from "./Modal"
 
 const BrandForm = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const brandId = searchParams.get('id');
-  const { currentBrand, status, error } = useSelector((state: RootState) => state.brands);
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const brandId = searchParams.get("id")
+  const { currentBrand, status, error } = useSelector((state: RootState) => state.brands)
 
   const [formData, setFormData] = useState<Partial<Brand>>({
-    brandName: '',
-    brandDescription: '',
-    brandCategory: '',
-    contactEmail: '',
-    brandWebsite: '',
-    brandPhoneNumber: '',
+    brandName: "",
+    brandLogo: "",
+    brandDescription: "",
+    brandCategory: "",
+    contactEmail: "",
+    brandWebsite: "",
+    brandPhoneNumber: "",
     socialMediaLinks: {
-      facebook: '',
-      twitter: '',
-      instagram: '',
-      linkedin: '',
+      facebook: "",
+      twitter: "",
+      instagram: "",
+      linkedin: "",
     },
-    gstNumber: '',
-  });
+    gstNumber: "",
+    password: "",
+  })
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMessage, setModalMessage] = useState("")
 
   useEffect(() => {
     if (brandId) {
-      dispatch(fetchBrand(brandId));
+      dispatch(fetchBrand(brandId))
     }
-  }, [dispatch, brandId]);
+  }, [dispatch, brandId])
 
   useEffect(() => {
     if (currentBrand && brandId) {
-      setFormData(currentBrand);
+      setFormData(currentBrand)
     }
-  }, [currentBrand, brandId]);
+  }, [currentBrand, brandId])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    if (name.startsWith('socialMediaLinks.')) {
-      const socialMedia = name.split('.')[1];
-      setFormData(prev => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, files } = e.target as HTMLInputElement
+    if (name.startsWith("socialMediaLinks.")) {
+      const socialMedia = name.split(".")[1]
+      setFormData((prev) => ({
         ...prev,
         socialMediaLinks: {
           ...prev.socialMediaLinks,
-          [socialMedia]: value
-        }
-      }));
+          [socialMedia]: value,
+        },
+      }))
+    } else if (name === "brandLogo" && files && files[0]) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setFormData((prev) => ({ ...prev, [name]: event.target?.result as string }))
+      }
+      reader.readAsDataURL(files[0])
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }))
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       if (brandId) {
-        await dispatch(updateBrand({ id: brandId, brandData: formData })).unwrap();
-        setModalMessage('Brand updated successfully');
+        await dispatch(updateBrand({ id: brandId, brandData: formData })).unwrap()
+        setModalMessage("Brand updated successfully")
       } else {
-        await dispatch(createBrand(formData as Omit<Brand, '_id'>)).unwrap();
-        setModalMessage('Brand created successfully');
+        await dispatch(createBrand(formData as Omit<Brand, "_id">)).unwrap()
+        setModalMessage("Brand created successfully")
       }
-      setIsModalOpen(true);
+      setIsModalOpen(true)
     } catch (error) {
-      alert(brandId ? 'Failed to update brand' : 'Failed to create brand');
+      alert(brandId ? "Failed to update brand" : "Failed to create brand")
     }
-  };
+  }
 
   const handleModalClose = () => {
-    setIsModalOpen(false);
-    router.push('/brandTable');
-  };
+    setIsModalOpen(false)
+    router.push("/brandTable")
+  }
 
-  if (status === 'loading') return <div>Loading...</div>;
-  if (status === 'failed') return <div>Error: {error}</div>;
+  if (status === "loading") return <div>Loading...</div>
+  if (status === "failed") return <div>Error: {error}</div>
 
   return (
     <div className="max-w-6xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
@@ -94,7 +102,9 @@ const BrandForm = () => {
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-2">
           {/* Brand Name */}
           <div>
-            <label htmlFor="brandName" className="block text-lg font-medium text-dark dark:text-white mb-2">Name</label>
+            <label htmlFor="brandName" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Name
+            </label>
             <input
               type="text"
               id="brandName"
@@ -109,7 +119,9 @@ const BrandForm = () => {
 
           {/* Brand Logo */}
           <div>
-            <label htmlFor="brandLogo" className="block text-lg font-medium text-dark dark:text-white mb-2">Logo</label>
+            <label htmlFor="brandLogo" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Logo
+            </label>
             <input
               type="file"
               id="brandLogo"
@@ -118,11 +130,16 @@ const BrandForm = () => {
               className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               accept="image/*"
             />
+            {formData.brandLogo && (
+              <img src={formData.brandLogo || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
+            )}
           </div>
 
           {/* Brand Description */}
           <div className="col-span-2">
-            <label htmlFor="brandDescription" className="block text-lg font-medium text-dark dark:text-white mb-2">Description</label>
+            <label htmlFor="brandDescription" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Description
+            </label>
             <textarea
               id="brandDescription"
               name="brandDescription"
@@ -136,7 +153,9 @@ const BrandForm = () => {
 
           {/* Brand Category */}
           <div>
-            <label htmlFor="brandCategory" className="block text-lg font-medium text-dark dark:text-white mb-2">Product Category</label>
+            <label htmlFor="brandCategory" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Product Category
+            </label>
             <select
               id="brandCategory"
               name="brandCategory"
@@ -157,7 +176,9 @@ const BrandForm = () => {
 
           {/* Contact Email */}
           <div>
-            <label htmlFor="contactEmail" className="block text-lg font-medium text-dark dark:text-white mb-2">Email Id</label>
+            <label htmlFor="contactEmail" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Email Id
+            </label>
             <input
               type="email"
               id="contactEmail"
@@ -172,7 +193,9 @@ const BrandForm = () => {
 
           {/* Brand Website */}
           <div>
-            <label htmlFor="brandWebsite" className="block text-lg font-medium text-dark dark:text-white mb-2">Website URL</label>
+            <label htmlFor="brandWebsite" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Website URL
+            </label>
             <input
               type="url"
               id="brandWebsite"
@@ -187,7 +210,9 @@ const BrandForm = () => {
 
           {/* Brand Phone Number */}
           <div>
-            <label htmlFor="brandPhoneNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">Contact Number</label>
+            <label htmlFor="brandPhoneNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Contact Number
+            </label>
             <input
               type="tel"
               id="brandPhoneNumber"
@@ -200,54 +225,76 @@ const BrandForm = () => {
           </div>
 
           {/* Social Media Links */}
-          <div  className="">
-          <label htmlFor="socialMediaLinks.facebook" className="block text-lg font-medium text-dark dark:text-white mb-2">Facebook</label>
-          <input
-            type="url"
-            id="socialMediaLinks.facebook"
-            name="socialMediaLinks.facebook"
-            value={formData.socialMediaLinks?.facebook}
-            onChange={handleChange}
-            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        <div  className="">
-          <label htmlFor="socialMediaLinks.twitter" className="block text-lg font-medium text-dark dark:text-white mb-2">Twitter</label>
-          <input
-            type="url"
-            id="socialMediaLinks.twitter"
-            name="socialMediaLinks.twitter"
-            value={formData.socialMediaLinks?.twitter}
-            onChange={handleChange}
-            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        <div  className="">
-          <label htmlFor="socialMediaLinks.instagram" className="block text-lg font-medium text-dark dark:text-white mb-2">Instagram</label>
-          <input
-            type="url"
-            id="socialMediaLinks.instagram"
-            name="socialMediaLinks.instagram"
-            value={formData.socialMediaLinks?.instagram}
-            onChange={handleChange}
-            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        <div  className="">
-          <label htmlFor="socialMediaLinks.linkedin" className="block text-lg font-medium text-dark dark:text-white mb-2">LinkedIn</label>
-          <input
-            type="url"
-            id="socialMediaLinks.linkedin"
-            name="socialMediaLinks.linkedin"
-            value={formData.socialMediaLinks?.linkedin}
-            onChange={handleChange}
-            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
+          <div className="">
+            <label
+              htmlFor="socialMediaLinks.facebook"
+              className="block text-lg font-medium text-dark dark:text-white mb-2"
+            >
+              Facebook
+            </label>
+            <input
+              type="url"
+              id="socialMediaLinks.facebook"
+              name="socialMediaLinks.facebook"
+              value={formData.socialMediaLinks?.facebook}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="socialMediaLinks.twitter"
+              className="block text-lg font-medium text-dark dark:text-white mb-2"
+            >
+              Twitter
+            </label>
+            <input
+              type="url"
+              id="socialMediaLinks.twitter"
+              name="socialMediaLinks.twitter"
+              value={formData.socialMediaLinks?.twitter}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="socialMediaLinks.instagram"
+              className="block text-lg font-medium text-dark dark:text-white mb-2"
+            >
+              Instagram
+            </label>
+            <input
+              type="url"
+              id="socialMediaLinks.instagram"
+              name="socialMediaLinks.instagram"
+              value={formData.socialMediaLinks?.instagram}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="socialMediaLinks.linkedin"
+              className="block text-lg font-medium text-dark dark:text-white mb-2"
+            >
+              LinkedIn
+            </label>
+            <input
+              type="url"
+              id="socialMediaLinks.linkedin"
+              name="socialMediaLinks.linkedin"
+              value={formData.socialMediaLinks?.linkedin}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
           {/* GST Number */}
           <div>
-            <label htmlFor="gstNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">GST Number</label>
+            <label htmlFor="gstNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              GST Number
+            </label>
             <input
               type="text"
               id="gstNumber"
@@ -259,7 +306,9 @@ const BrandForm = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">Password</label>
+            <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Password
+            </label>
             <input
               type="password"
               id="password"
@@ -273,15 +322,13 @@ const BrandForm = () => {
           </div>
         </div>
 
-        
-
         {/* Submit Button */}
         <div className="flex justify-center mt-6">
           <button
             type="submit"
             className="w-full md:w-1/3 py-4 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            {brandId ? 'Update Brand' : 'Create Brand'}
+            {brandId ? "Update Brand" : "Create Brand"}
           </button>
         </div>
       </form>
@@ -292,7 +339,8 @@ const BrandForm = () => {
         <p>{modalMessage}</p>
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default BrandForm;
+export default BrandForm
+

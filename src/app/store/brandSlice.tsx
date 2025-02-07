@@ -170,4 +170,3 @@ const brandsSlice = createSlice({
 });
 
 export default brandsSlice.reducer;
-
