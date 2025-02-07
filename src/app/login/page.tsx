@@ -3,14 +3,14 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { API_ROUTES } from "../apiroutes" 
+import { API_ROUTES } from "../apiroutes" // Make sure this path is correct
 
 const LoginForm = () => {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "", 
+    role: "admin", // Default to 'admin'
   })
 
   const [error, setError] = useState<string | null>(null)
@@ -26,11 +26,6 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!formData.role) {
-      setError("Please select a role before logging in.")
-      return
-    }
-
     try {
       const response = await fetch(API_ROUTES.ADMIN_LOGIN, {
         method: "POST",
@@ -42,9 +37,12 @@ const LoginForm = () => {
 
       if (response.ok) {
         const data = await response.json()
+        // Assuming the API returns a token or some authentication data
         localStorage.setItem("isLoggedIn", "true")
+        // You might want to store the token or other auth data here as well
+        // localStorage.setItem("authToken", data.token);
         setError(null)
-        router.push("/") 
+        router.push("/") // Redirect to home page (dashboard)
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Invalid email or password")
@@ -101,24 +99,7 @@ const LoginForm = () => {
             />
           </div>
 
-          {/* Role Dropdown */}
-          <div className="mb-4">
-            <label htmlFor="role" className="block text-lg font-medium text-dark mb-2">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            >
-              <option value="">Select a role</option> {/* Placeholder option */}
-              <option value="admin">Admin</option>
-              <option value="brand">Brand</option>
-            </select>
-          </div>
+         
 
           {/* Submit Button */}
           <div className="flex justify-center">
@@ -136,3 +117,4 @@ const LoginForm = () => {
 }
 
 export default LoginForm
+
