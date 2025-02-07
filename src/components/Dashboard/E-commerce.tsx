@@ -11,7 +11,11 @@ import ChartOne from "../../components/Charts/ChartOne";
 import PanelNavigation from "../../components/DataStats/cardTwo"
 
 
+
 const ECommerce: React.FC = () => {
+
+
+
   return (
     <>
     < PanelNavigation/>
