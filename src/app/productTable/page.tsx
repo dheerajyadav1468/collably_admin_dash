@@ -1,3 +1,7 @@
+"use client"
+
+import { useState } from "react"
+
 import ECommerce from "../../components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand";
@@ -7,22 +11,20 @@ import PanelNavigation from "../../components/DataStats/cardTwo"
 import ProductsTable from '../../components/Tables/productTable'
 
 
-export const metadata: Metadata = {
-  title:
-    "Collably | Brand Dashboard",
-  description: "Collably Home page",
-};
 
 export default function Home() {
+
+  const [activePanel, setActivePanel] = useState<"customer" | "brand">("brand")
+
+  const handlePanelChange = (panel: "customer" | "brand") => {
+    setActivePanel(panel)
+  }
+
   return (
     <>
-     <Head>
-     <title>{String(metadata.title)}</title>
-        <meta name="description" content={metadata.description} />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+     
       <DefaultLayoutBrand>
-        < PanelNavigation/>
+                <PanelNavigation activePanel={activePanel} onPanelChange={handlePanelChange} />
         {/* <ECommerce /> */}
         
         {/* <ChartTwo /> */}

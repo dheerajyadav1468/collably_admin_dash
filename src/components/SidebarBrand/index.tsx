@@ -39,7 +39,7 @@ const menuGroups = [
             />
           </svg>
         ),
-        label: "Dashboard", route: "" ,
+        label: "Dashboard", route: "/brandPanel" ,
        
       },
       {
