@@ -3,19 +3,18 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { API_ROUTES } from "../apiroutes" // Make sure this path is correct
+import { API_ROUTES } from "../apiroutes"
 
 const LoginForm = () => {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "admin", // Default to 'admin'
   })
 
   const [error, setError] = useState<string | null>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -27,22 +26,26 @@ const LoginForm = () => {
     e.preventDefault()
 
     try {
-      const response = await fetch(API_ROUTES.ADMIN_LOGIN, {
+      const response = await fetch(API_ROUTES.BRAND_LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          contactEmail: formData.email,
+          password: formData.password,
+        }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        // Assuming the API returns a token or some authentication data
+
         localStorage.setItem("isLoggedIn", "true")
-        // You might want to store the token or other auth data here as well
-        // localStorage.setItem("authToken", data.token);
+        localStorage.setItem("userRole", "brand")
+        localStorage.setItem("userName", data.brandName)
+
         setError(null)
-        router.push("/") // Redirect to home page (dashboard)
+        router.push("/brandPanel")
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Invalid email or password")
@@ -98,8 +101,6 @@ const LoginForm = () => {
               required
             />
           </div>
-
-         
 
           {/* Submit Button */}
           <div className="flex justify-center">
