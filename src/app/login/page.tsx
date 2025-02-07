@@ -24,8 +24,8 @@ const LoginForm = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
+    e.preventDefault();
+  
     try {
       const response = await fetch(API_ROUTES.ADMIN_LOGIN, {
         method: "POST",
@@ -33,25 +33,28 @@ const LoginForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
-
+      });
+  
       if (response.ok) {
-        const data = await response.json()
-        // Assuming the API returns a token or some authentication data
-        localStorage.setItem("isLoggedIn", "true")
-        // You might want to store the token or other auth data here as well
-        // localStorage.setItem("authToken", data.token);
-        setError(null)
-        router.push("/") // Redirect to home page (dashboard)
+        const data = await response.json();
+        
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("userName", data.user.fullname); 
+        console.log(data);
+        console.log(data.user.fullname);
+        setError(null);
+        router.push("/"); 
       } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Invalid email or password")
+        const errorData = await response.json();
+        setError(errorData.message || "Invalid email or password");
       }
     } catch (error) {
-      setError("An error occurred. Please try again.")
-      console.error("Login error:", error)
+      setError("An error occurred. Please try again.");
+      console.error("Login error:", error);
     }
-  }
+  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

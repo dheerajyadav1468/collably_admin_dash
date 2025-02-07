@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { API_ROUTES } from "../apiroutes"
+import { jwtDecode } from "jwt-decode";
+
 
 const LoginForm = () => {
   const router = useRouter()
@@ -22,39 +24,45 @@ const LoginForm = () => {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  // Import JWT decoder
 
-    try {
-      const response = await fetch(API_ROUTES.BRAND_LOGIN, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contactEmail: formData.email,
-          password: formData.password,
-        }),
-      })
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-      if (response.ok) {
-        const data = await response.json()
+  try {
+    const response = await fetch(API_ROUTES.BRAND_LOGIN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contactEmail: formData.email,
+        password: formData.password,
+      }),
+    });
 
-        localStorage.setItem("isLoggedIn", "true")
-        localStorage.setItem("userRole", "brand")
-        localStorage.setItem("userName", data.brandName)
+    if (response.ok) {
+      const data = await response.json();
+      const decodedToken = jwtDecode(data.token); // ✅ Decode the JWT
 
-        setError(null)
-        router.push("/brandPanel")
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Invalid email or password")
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again.")
-      console.error("Login error:", error)
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userRole", "brand");
+      localStorage.setItem("userName", decodedToken.brandName || "Brand User"); // ✅ Extract brandName
+console.log(data);
+console.log(data.brandName);
+      setError(null);
+      router.push("/brandPanel");
+    } else {
+      const errorData = await response.json();
+      setError(errorData.message || "Invalid email or password");
     }
+  } catch (error) {
+    setError("An error occurred. Please try again.");
+    console.error("Login error:", error);
   }
+};
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
