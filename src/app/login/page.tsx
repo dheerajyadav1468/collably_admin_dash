@@ -1,73 +1,85 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { API_ROUTES } from "../apiroutes" 
 
 const LoginForm = () => {
-  const router = useRouter();
+  const router = useRouter()
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    role: 'admin', // Default to 'admin'
-  });
+    email: "",
+    password: "",
+    role: "", 
+  })
 
-  const [error, setError] = useState<string | null>(null);
-
-  const dummyData = {
-    admin: {
-      username: 'admin',
-      password: 'admin123',
-    },
-    brand: {
-      username: 'brandUser',
-      password: 'brand123',
-    },
-  };
+  const [error, setError] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
-    const { username, password, role } = formData;
-    if (
-      username === dummyData[role].username &&
-      password === dummyData[role].password
-    ) {
-      setError(null);
-      router.push('/'); // Redirect to the home page (or any other route)
-    } else {
-      setError('Invalid username or password');
+    if (!formData.role) {
+      setError("Please select a role before logging in.")
+      return
     }
-  };
+
+    try {
+      const response = await fetch(API_ROUTES.ADMIN_LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        localStorage.setItem("isLoggedIn", "true")
+        setError(null)
+        router.push("/") 
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Invalid email or password")
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.")
+      console.error("Login error:", error)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-[430px] p-8 bg-white rounded-lg shadow-lg space-y-6">
+        <div className="flex justify-center mb-6">
+          <Image src="/images/logo/logo-collably.png" alt="Logo" width={120} height={40} className="object-contain" />
+        </div>
+
         <h4 className="text-3xl font-semibold text-dark mb-6">Login</h4>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Username */}
+          {/* Email */}
           <div className="mb-4">
-            <label htmlFor="username" className="block text-lg font-medium text-dark mb-2">
-              Username
+            <label htmlFor="email" className="block text-lg font-medium text-dark mb-2">
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               required
             />
           </div>
@@ -102,6 +114,7 @@ const LoginForm = () => {
               className="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             >
+              <option value="">Select a role</option> {/* Placeholder option */}
               <option value="admin">Admin</option>
               <option value="brand">Brand</option>
             </select>
@@ -111,7 +124,7 @@ const LoginForm = () => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-4 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full py-4 px-6 bg-[#ff0055] text-white rounded-lg hover:bg-[#e6234d] transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               Login
             </button>
@@ -119,7 +132,7 @@ const LoginForm = () => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm

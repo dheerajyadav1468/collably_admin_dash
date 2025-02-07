@@ -22,5 +22,7 @@ export const API_ROUTES = {
   SUGGESTIONS_USER: "http://127.0.0.1:5000/api/suggestionsUser",
   // Order routes
   GET_ALL_ORDERS: "http://127.0.0.1:5000/api/getallorders",
+
+  ADMIN_LOGIN: "http://127.0.0.1:5000/api/admin_login",
 }
 
