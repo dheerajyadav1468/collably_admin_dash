@@ -20,5 +20,7 @@ export const API_ROUTES = {
   UNFOLLOW_USER: (id: string) => `http://127.0.0.1:5000/api/user/${id}/unfollow`,
   SEARCH_USER: "http://127.0.0.1:5000/api/search",
   SUGGESTIONS_USER: "http://127.0.0.1:5000/api/suggestionsUser",
+  // Order routes
+  GET_ALL_ORDERS: "http://127.0.0.1:5000/api/getallorders",
 }
 

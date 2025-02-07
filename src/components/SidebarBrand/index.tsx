@@ -94,7 +94,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Orders",
-        route: "",
+        route: "/orderTable",
       },
       {
         icon: (
