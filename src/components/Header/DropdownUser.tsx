@@ -14,10 +14,7 @@ const DropdownUser = () => {
 
 
   const handleLogout = () => {
-    // Clear login state from localStorage
     localStorage.removeItem("isLoggedIn");
-    
-    // Redirect the user to the login page after logging out
     router.push("/login");
   };
 
