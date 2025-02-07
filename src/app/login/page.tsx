@@ -41,11 +41,10 @@ const LoginForm = () => {
       username === dummyData[role].username &&
       password === dummyData[role].password
     ) {
-      // Set the login flag in localStorage
       localStorage.setItem("isLoggedIn", "true");
 
       setError(null);
-      router.push('/'); // Redirect to home page (dashboard)
+      router.push('/');
     } else {
       setError('Invalid username or password');
     }
