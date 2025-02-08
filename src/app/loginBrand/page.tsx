@@ -40,7 +40,7 @@ const LoginForm = () => {
         localStorage.setItem("isLoggedIn", "true")
         localStorage.setItem("userType", "brand")
         localStorage.setItem("brandId", data.brand.brandId)
-        localStorage.setItem("brandName", data.brand.brandName)
+        localStorage.setItem("userName", data.brand.brandName)
         localStorage.setItem("token", data.token)
 
         setError(null)
