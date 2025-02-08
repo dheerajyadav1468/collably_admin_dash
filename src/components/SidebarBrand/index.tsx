@@ -136,7 +136,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Coupons",
-        route: "",
+        route: "/coupon",
       },
       {
         icon: (

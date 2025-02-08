@@ -36,8 +36,20 @@ const ProductForm = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [loggedInBrandId, setLoggedInBrandId] = useState<string | null>(null)
 
   useEffect(() => {
+    const role = localStorage.getItem("userType")
+    setUserRole(role)
+    console.log(role);
+    const brandId = localStorage.getItem("brandId")
+    setLoggedInBrandId(brandId)
+
+    if (role !== "admin") {
+      setFormData((prev) => ({ ...prev, brandId: brandId || "" }))
+    }
+
     dispatch(fetchAllBrands())
     if (productId) {
       dispatch(fetchProduct(productId))
@@ -67,10 +79,12 @@ const ProductForm = () => {
   }
 
   const handleSelectChange = (selectedOption: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      brandId: selectedOption ? selectedOption.value : "",
-    }))
+    if (userRole === "admin") {
+      setFormData((prev) => ({
+        ...prev,
+        brandId: selectedOption ? selectedOption.value : "",
+      }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -132,10 +146,16 @@ const ProductForm = () => {
             <Select
               id="brandId"
               name="brandId"
-              value={brandOptions.find((option) => option.value === formData.brandId) || null}
+              value={
+                userRole === "admin"
+                  ? brandOptions.find((option) => option.value === formData.brandId) || null
+                  : brandOptions.find((option) => option.value === loggedInBrandId) || null
+              }
               onChange={handleSelectChange}
-              options={brandOptions}
-              isClearable
+              options={
+                userRole === "admin" ? brandOptions : brandOptions.filter((option) => option.value === loggedInBrandId)
+              }
+              isDisabled={userRole !== "admin"}
               className="w-full p-2.5 border-2 border-gray-300 rounded-lg focus:outline-none bg-dark focus:ring-2 focus:ring-indigo-500"
               classNamePrefix="react-select"
               placeholder="Select Brand"

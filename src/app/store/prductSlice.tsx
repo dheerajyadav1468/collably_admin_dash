@@ -31,7 +31,7 @@ export const createProduct = createAsyncThunk("products/createProduct", async (p
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization:  localStorage.getItem("token"),
     },
     body: JSON.stringify(productData),
   })
@@ -52,7 +52,7 @@ export const fetchAllProducts = createAsyncThunk("products/fetchAllProducts", as
 export const fetchBrandProducts = createAsyncThunk("products/fetchBrandProducts", async (brandId: string) => {
   const response = await fetch(`${API_ROUTES.GET_BRAND_PRODUCTS}?brandId=${brandId}`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: localStorage.getItem("token"),
     },
   })
   if (!response.ok) {
@@ -64,7 +64,7 @@ export const fetchBrandProducts = createAsyncThunk("products/fetchBrandProducts"
 export const fetchProduct = createAsyncThunk("products/fetchProduct", async (id: string) => {
   const response = await fetch(API_ROUTES.GET_PRODUCT(id), {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: localStorage.getItem("token"),
     },
   })
   if (!response.ok) {
@@ -77,7 +77,7 @@ export const deleteProduct = createAsyncThunk("products/deleteProduct", async (i
   const response = await fetch(API_ROUTES.DELETE_PRODUCT(id), {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: localStorage.getItem("token"),
     },
   })
   if (!response.ok) {
@@ -93,7 +93,7 @@ export const updateProduct = createAsyncThunk(
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
       },
       body: JSON.stringify(productData),
     })
@@ -193,4 +193,3 @@ const productsSlice = createSlice({
 
 export const { clearProducts } = productsSlice.actions
 export default productsSlice.reducer
-

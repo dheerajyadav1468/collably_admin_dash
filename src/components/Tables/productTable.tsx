@@ -321,4 +321,3 @@ const ProductsTable = () => {
 }
 
 export default ProductsTable
-

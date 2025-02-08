@@ -35,6 +35,7 @@ const LoginForm = () => {
       })
 
       if (response.ok) {
+       
         const data = await response.json()
 
         localStorage.setItem("isLoggedIn", "true")
@@ -117,4 +118,3 @@ const LoginForm = () => {
 }
 
 export default LoginForm
-
