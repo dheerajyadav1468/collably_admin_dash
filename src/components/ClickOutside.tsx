@@ -6,13 +6,17 @@ interface ClickOutsideProps {
   className?: string;
 }
 
-const ClickOutside = ({ children, onClickOutside, className }: ClickOutsideProps) => {
+const ClickOutside = ({ children, onClickOutside = () => {} , className }: ClickOutsideProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClickOutside(); // ✅ Ensure function exists
+        if (typeof onClickOutside === "function") {
+          onClickOutside(); // ✅ Ensure function exists
+        } else {
+          console.warn("onClickOutside is not a function");
+        }
       }
     };
 
