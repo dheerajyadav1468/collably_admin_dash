@@ -1,92 +1,123 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../app/store/store";
-import { fetchAllProducts, deleteProduct } from "../../app/store/prductSlice";
-import { fetchAllBrands } from "../../app/store/brandSlice";
-import Link from "next/link";
-import { Filter, Plus, Search } from "lucide-react";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../../app/store/store"
+import { fetchAllProducts, deleteProduct } from "../../app/store/prductSlice"
+import { fetchAllBrands } from "../../app/store/brandSlice"
+import Link from "next/link"
+import { Filter, Plus, Search } from "lucide-react"
 
 const ProductsTable = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const { products, status, error } = useSelector(
-    (state: RootState) => state.products,
-  );
-  const { brands } = useSelector((state: RootState) => state.brands);
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const { products, status, error } = useSelector((state: RootState) => state.products)
+  const { brands } = useSelector((state: RootState) => state.brands)
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     brand: "",
     category: "",
     stockStatus: "",
     status: "",
     product: "",
-  });
-  const [searchTerm, setSearchTerm] = useState("");
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [brandProducts, setBrandProducts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const userRole = localStorage.getItem("userRole")
+  const brandName = localStorage.getItem("userName")
 
   useEffect(() => {
-    dispatch(fetchAllProducts());
-    dispatch(fetchAllBrands());
-  }, [dispatch]);
+    const fetchProducts = async () => {
+      setIsLoading(true)
+      try {
+        if (userRole === "admin") {
+          await dispatch(fetchAllProducts())
+          await dispatch(fetchAllBrands())
+        } else if (userRole === "brand") {
+          // Find brandId from brands list
+          const brand = brands.find((b) => b.brandName === brandName)
+          if (brand) {
+            const response = await fetch(`http://127.0.0.1:5000/api/brand/products?brandId=${brand._id}`)
+            if (!response.ok) throw new Error("Failed to fetch brand products")
+            const data = await response.json()
+            setBrandProducts(data)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      }
+      setIsLoading(false)
+    }
+
+    fetchProducts()
+  }, [dispatch, userRole, brandName, brands])
+
+  const displayProducts = userRole === "admin" ? products : brandProducts
 
   const handleViewClick = (productId: string) => {
-    router.push(`/profileProduct?id=${productId}`);
-  };
+    router.push(`/profileProduct?id=${productId}`)
+  }
 
   const handleEditClick = (productId: string) => {
-    router.push(`/productForm?id=${productId}`);
-  };
+    router.push(`/productForm?id=${productId}`)
+  }
 
   const handleDeleteClick = async (productId: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await dispatch(deleteProduct(productId)).unwrap();
-        alert("Product deleted successfully");
+        await dispatch(deleteProduct(productId)).unwrap()
+        alert("Product deleted successfully")
+        // Refresh the products list after deletion
+        if (userRole === "admin") {
+          dispatch(fetchAllProducts())
+        } else {
+          const brand = brands.find((b) => b.brandName === brandName)
+          if (brand) {
+            const response = await fetch(`http://127.0.0.1:5000/api/brand/products?brandId=${brand._id}`)
+            if (!response.ok) throw new Error("Failed to fetch brand products")
+            const data = await response.json()
+            setBrandProducts(data)
+          }
+        }
       } catch (error) {
-        alert("Failed to delete product");
+        alert("Failed to delete product")
       }
     }
-  };
+  }
 
   const handleFilterChange = (filterName: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filterName]: value }));
-  };
+    setFilters((prev) => ({ ...prev, [filterName]: value }))
+  }
 
   const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+    setShowFilters(!showFilters)
+  }
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = displayProducts.filter((product) => {
     return (
       (!filters.brand || product.brandId === filters.brand) &&
       (!filters.category || product.category === filters.category) &&
-      (!filters.stockStatus ||
-        (filters.stockStatus === "In Stock"
-          ? product.quantity > 0
-          : product.quantity === 0)) &&
+      (!filters.stockStatus || (filters.stockStatus === "In Stock" ? product.quantity > 0 : product.quantity === 0)) &&
       (!filters.status || product.status === filters.status) &&
-      (!filters.product ||
-        product.productname
-          .toLowerCase()
-          .includes(filters.product.toLowerCase())) &&
-      (!searchTerm ||
-        product.productname.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  });
+      (!filters.product || product.productname.toLowerCase().includes(filters.product.toLowerCase())) &&
+      (!searchTerm || product.productname.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  })
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "failed") return <div>Error: {error}</div>;
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
 
-  const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"];
+  const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"]
 
   return (
-    <div className="p-4  bg-dark text-gray rounded-lg w-full">
+    <div className="p-4 bg-dark text-gray rounded-lg w-full">
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Products</h1>
+          <h1 className="text-2xl font-bold">{userRole === "admin" ? "All Products" : `${brandName}'s Products`}</h1>
           <div className="flex gap-2">
             <Link
               href="/productForm"
@@ -137,9 +168,7 @@ const ProductsTable = () => {
 
             <select
               value={filters.stockStatus}
-              onChange={(e) =>
-                handleFilterChange("stockStatus", e.target.value)
-              }
+              onChange={(e) => handleFilterChange("stockStatus", e.target.value)}
               className="w-full rounded-md border p-2  bg-black text-gray"
             >
               <option value="">All Stock Status</option>
@@ -175,21 +204,11 @@ const ProductsTable = () => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-stroke dark:border-dark-3">
-              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">
-                Product
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Category
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Price
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Stock Status
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Status
-              </th>
+              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">Product</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Category</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Price</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Stock Status</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Status</th>
               <th className="hidden px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base sm:table-cell">
                 Action
               </th>
@@ -199,34 +218,20 @@ const ProductsTable = () => {
             {filteredProducts.map((product, key) => (
               <tr
                 key={product._id}
-                className={
-                  key === filteredProducts.length - 1
-                    ? ""
-                    : "border-b border-stroke dark:border-dark-3"
-                }
+                className={key === filteredProducts.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
               >
                 <td className="flex items-center gap-3.5 px-2 py-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
-                    {product.productname
-                      ? product.productname.charAt(0).toUpperCase()
-                      : ""}
+                    {product.productname ? product.productname.charAt(0).toUpperCase() : ""}
                   </div>
-                  <p className="hidden font-medium text-dark dark:text-white sm:block">
-                    {product.productname}
-                  </p>
+                  <p className="hidden font-medium text-dark dark:text-white sm:block">{product.productname}</p>
                 </td>
-                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
-                  {product.category}
-                </td>
-                <td className="px-2 py-4 text-center font-medium text-green-light-1">
-                  ₹{product.price}
-                </td>
+                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{product.category}</td>
+                <td className="px-2 py-4 text-center font-medium text-green-light-1">₹{product.price}</td>
                 <td className="px-2 py-4 text-center">
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${
-                      product.quantity > 0
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      product.quantity > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}
                   >
                     {product.quantity > 0 ? "In Stock" : "Out of Stock"}
@@ -235,19 +240,14 @@ const ProductsTable = () => {
                 <td className="px-2 py-4 text-center">
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${
-                      product.status === "Published"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
+                      product.status === "Published" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {product.status}
                   </span>
                 </td>
                 <td className="px-2 py-4 text-center sm:table-cell">
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleViewClick(product._id)}
-                  >
+                  <button className="hover:text-primary" onClick={() => handleViewClick(product._id)}>
                     <svg
                       className="fill-current"
                       width="20"
@@ -270,10 +270,7 @@ const ProductsTable = () => {
                       />
                     </svg>
                   </button>
-                  <button
-                    className="ml-3 hover:text-primary"
-                    onClick={() => handleEditClick(product._id)}
-                  >
+                  <button className="ml-3 hover:text-primary" onClick={() => handleEditClick(product._id)}>
                     {" "}
                     <svg
                       className="fill-current"
@@ -293,10 +290,7 @@ const ProductsTable = () => {
                       />
                     </svg>
                   </button>
-                  <button
-                    className="ml-3 hover:text-primary"
-                    onClick={() => handleDeleteClick(product._id)}
-                  >
+                  <button className="ml-3 hover:text-primary" onClick={() => handleDeleteClick(product._id)}>
                     <svg
                       className="fill-current"
                       width="20"
@@ -320,7 +314,8 @@ const ProductsTable = () => {
         </table>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProductsTable;
+export default ProductsTable
+
