@@ -18,7 +18,7 @@ const DropdownUser = () => {
     const role = localStorage.getItem("userRole")
     const name = role === "admin" 
       ? localStorage.getItem("userName") 
-      : localStorage.getItem("brandName")
+      : localStorage.getItem("userName")
       console.log(name);
     setIsLoggedIn(loggedIn)
     setUserRole(role)

@@ -26,41 +26,40 @@ const LoginForm = () => {
 
   // Import JWT decoder
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-
-  try {
-    const response = await fetch(API_ROUTES.BRAND_LOGIN, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contactEmail: formData.email,
-        password: formData.password,
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const decodedToken = jwtDecode(data.token); // ✅ Decode the JWT
-
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userRole", "brand");
-      localStorage.setItem("userName", decodedToken.brandName || "Brand User"); // ✅ Extract brandName
-console.log(data);
-console.log(data.brandName);
-      setError(null);
-      router.push("/brandPanel");
-    } else {
-      const errorData = await response.json();
-      setError(errorData.message || "Invalid email or password");
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch(API_ROUTES.BRAND_LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contactEmail: formData.email,
+          password: formData.password,
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userRole", "brand");
+        localStorage.setItem("userName", data.brand.brandName);  // ✅ Store brandName
+  console.log(data.brand.brandName);
+        setError(null);
+        router.push("/brandPanel");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Invalid email or password");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+      console.error("Login error:", error);
     }
-  } catch (error) {
-    setError("An error occurred. Please try again.");
-    console.error("Login error:", error);
-  }
-};
+  };
+  
 
   
 
