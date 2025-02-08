@@ -8,7 +8,7 @@ import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand";
 import React from "react";
 import Head from "next/head";
 import PanelNavigation from "../../components/DataStats/cardTwo"
-import ProductsTable from '../../components/Tables/productTable'
+import ProductsTable from '../../components/Tables/brandProductTable'
 
 
 
@@ -30,7 +30,7 @@ export default function Home() {
         {/* <ChartTwo /> */}
         {/* <ChartThree /> */}
         <main className="flex mt-3 gap-5">
-      <ProductsTable/>
+         <ProductsTable/>
         </main>
        
       </DefaultLayoutBrand>
