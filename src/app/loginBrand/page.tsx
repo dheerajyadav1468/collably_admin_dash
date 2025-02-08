@@ -24,7 +24,7 @@ const LoginForm = () => {
     }))
   }
 
-  // Import JWT decoder
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ const LoginForm = () => {
         
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userRole", "brand");
-        localStorage.setItem("userName", data.brand.brandName);  // ✅ Store brandName
+        localStorage.setItem("userName", data.brand.brandName);  
   console.log(data.brand.brandName);
         setError(null);
         router.push("/brandPanel");

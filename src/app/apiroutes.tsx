@@ -25,5 +25,6 @@ export const API_ROUTES = {
 
   ADMIN_LOGIN: "http://127.0.0.1:5000/api/admin_login",
   BRAND_LOGIN: "http://127.0.0.1:5000/api/brandlogin",
+  GET_BRAND_PRODUCTS: "http://127.0.0.1:5000/api/brand/products",
 }
 

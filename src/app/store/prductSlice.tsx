@@ -47,7 +47,13 @@ export const fetchAllProducts = createAsyncThunk("products/fetchAllProducts", as
   }
   return await response.json()
 })
-
+export const fetchBrandProducts = createAsyncThunk("products/fetchBrandProducts", async (brandId: string) => {
+  const response = await fetch(`${API_ROUTES.GET_BRAND_PRODUCTS}?brandId=${brandId}`)
+  if (!response.ok) {
+    throw new Error("Failed to fetch brand products")
+  }
+  return await response.json()
+})
 export const fetchProduct = createAsyncThunk("products/fetchProduct", async (id: string) => {
   const response = await fetch(API_ROUTES.GET_PRODUCT(id))
   if (!response.ok) {
@@ -148,6 +154,17 @@ const productsSlice = createSlice({
       .addCase(updateProduct.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.error.message || "Failed to update product"
+      })
+      .addCase(fetchBrandProducts.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(fetchBrandProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
+        state.status = "succeeded"
+        state.products = action.payload
+      })
+      .addCase(fetchBrandProducts.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.error.message || "Failed to fetch brand products"
       })
   },
 })

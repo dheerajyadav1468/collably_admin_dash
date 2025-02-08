@@ -3,14 +3,14 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { API_ROUTES } from "../apiroutes" // Make sure this path is correct
+import { API_ROUTES } from "../apiroutes" 
 
 const LoginForm = () => {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "admin", // Default to 'admin'
+    role: "admin", 
   })
 
   const [error, setError] = useState<string | null>(null)
