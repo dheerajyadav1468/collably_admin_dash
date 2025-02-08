@@ -31,6 +31,7 @@ export const createProduct = createAsyncThunk("products/createProduct", async (p
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify(productData),
   })
@@ -47,15 +48,25 @@ export const fetchAllProducts = createAsyncThunk("products/fetchAllProducts", as
   }
   return await response.json()
 })
+
 export const fetchBrandProducts = createAsyncThunk("products/fetchBrandProducts", async (brandId: string) => {
-  const response = await fetch(`${API_ROUTES.GET_BRAND_PRODUCTS}?brandId=${brandId}`)
+  const response = await fetch(`${API_ROUTES.GET_BRAND_PRODUCTS}?brandId=${brandId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
   if (!response.ok) {
     throw new Error("Failed to fetch brand products")
   }
   return await response.json()
 })
+
 export const fetchProduct = createAsyncThunk("products/fetchProduct", async (id: string) => {
-  const response = await fetch(API_ROUTES.GET_PRODUCT(id))
+  const response = await fetch(API_ROUTES.GET_PRODUCT(id), {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
   if (!response.ok) {
     throw new Error("Failed to fetch product")
   }
@@ -65,6 +76,9 @@ export const fetchProduct = createAsyncThunk("products/fetchProduct", async (id:
 export const deleteProduct = createAsyncThunk("products/deleteProduct", async (id: string) => {
   const response = await fetch(API_ROUTES.DELETE_PRODUCT(id), {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   })
   if (!response.ok) {
     throw new Error("Failed to delete product")
@@ -79,6 +93,7 @@ export const updateProduct = createAsyncThunk(
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(productData),
     })
@@ -93,7 +108,14 @@ export const updateProduct = createAsyncThunk(
 const productsSlice = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    clearProducts: (state) => {
+      state.products = []
+      state.currentProduct = null
+      state.status = "idle"
+      state.error = null
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createProduct.pending, (state) => {
@@ -169,5 +191,5 @@ const productsSlice = createSlice({
   },
 })
 
+export const { clearProducts } = productsSlice.actions
 export default productsSlice.reducer
-
