@@ -118,7 +118,7 @@ const ProductsTable = () => {
           <h1 className="text-2xl font-bold">{userType === "admin" ? "All Products" : `${brandName}'s Products`}</h1>
           <div className="flex gap-2">
             <Link
-              href="/productForm"
+              href="/addProductForm"
               className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               <Plus className="h-4 w-4" />
