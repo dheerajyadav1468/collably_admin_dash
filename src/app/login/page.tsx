@@ -3,14 +3,18 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { API_ROUTES } from "../apiroutes" 
+import { API_ROUTES } from "../apiroutes"
+import { useDispatch } from "react-redux"
+import type { AppDispatch } from "../store/store"
+import { fetchAllProducts } from "../store/prductSlice"
 
 const LoginForm = () => {
   const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "admin", 
+    role: "admin",
   })
 
   const [error, setError] = useState<string | null>(null)
@@ -24,8 +28,8 @@ const LoginForm = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  
+    e.preventDefault()
+
     try {
       const response = await fetch(API_ROUTES.ADMIN_LOGIN, {
         method: "POST",
@@ -33,28 +37,32 @@ const LoginForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      });
-  
+      })
+
       if (response.ok) {
-        const data = await response.json();
-        
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userRole", "admin");
-        localStorage.setItem("userName", data.user.fullname); 
-        console.log(data);
-        console.log(data.user.fullname);
-        setError(null);
-        router.push("/"); 
+        const data = await response.json()
+
+        localStorage.setItem("isLoggedIn", "true")
+        localStorage.setItem("userType", "admin")
+        localStorage.setItem("userName", data.user.fullname)
+        localStorage.setItem("token", data.token)
+        console.log(data)
+        console.log(data.user.fullname)
+        setError(null)
+
+        // Fetch all products after successful login
+        await dispatch(fetchAllProducts())
+
+        router.push("/")
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Invalid email or password");
+        const errorData = await response.json()
+        setError(errorData.message || "Invalid email or password")
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
-      console.error("Login error:", error);
+      setError("An error occurred. Please try again.")
+      console.error("Login error:", error)
     }
-  };
-  
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -101,8 +109,6 @@ const LoginForm = () => {
               required
             />
           </div>
-
-         
 
           {/* Submit Button */}
           <div className="flex justify-center">
