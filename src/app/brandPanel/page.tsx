@@ -3,7 +3,7 @@
 import { useState } from "react"
 import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand"
 import DataStatsTwo from "../../components/DataStats/DataStatsTwo"
-import PanelNavigation from "../../components/DataStats/cardTwo"
+import PanelNavigation from "../../components/DataStats/DataStatsTwo"
 import { MostSoldProducts } from "../../components/Card/brandCardOne"
 import { MostSoldBrands } from "../../components/Card/brandCardTwo"
 import { PopularCustomer } from "../../components/Card/brandCardThree"

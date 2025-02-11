@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/Card/cardBrand"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/Card/Table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table"
 
 const brands = [
   { name: "Samsung", total: 2 },
