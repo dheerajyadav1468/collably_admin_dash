@@ -5,7 +5,8 @@ const DropdownDefault = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <ClickOutside onClick={() => setDropdownOpen(false)}>
+    <ClickOutside onClickOutside={() => setDropdownOpen(false)}>
+
       <div className="relative flex">
         <button
           className="hover:text-primary"

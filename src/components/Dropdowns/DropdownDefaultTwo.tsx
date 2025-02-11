@@ -5,7 +5,8 @@ const DropdownDefaultTwo = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <ClickOutside onClick={() => setDropdownOpen(false)}>
+    <ClickOutside onClickOutside={() => setDropdownOpen(false)}>
+
       <div className="relative flex">
         <button
           className="flex items-center justify-center rounded-md bg-white px-1.5 py-[5px] shadow-1 hover:text-dark dark:bg-gray-dark dark:shadow-card dark:hover:text-white"
