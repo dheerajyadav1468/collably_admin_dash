@@ -4,6 +4,7 @@ import { API_ROUTES } from '../../app/apiroutes';
 export interface Brand {
   _id: string;
   brandName: string;
+  brandLogo?: string;
   brandDescription: string;
   brandCategory: string;
   contactEmail: string;
@@ -16,7 +17,9 @@ export interface Brand {
     linkedin: string;
   };
   gstNumber: string;
+  password?: string; // Add this line if 'password' is valid
 }
+
 
 interface BrandsState {
   brands: Brand[];
