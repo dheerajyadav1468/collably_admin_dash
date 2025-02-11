@@ -56,27 +56,31 @@ export default function OrderTable() {
   }, [dispatch])
 
   useEffect(() => {
-    console.log("useEffect triggered! Orders:", orders);
+    if (!Array.isArray(orders) || orders.length === 0) return;
   
-    if (!Array.isArray(orders) || orders.length === 0) {
-      console.log("No orders available.");
-      return;
-    }
+    const productIdsToFetch = new Set<string>();
   
-    // Extract product details directly from orders
-    const productDetailsMap = {};
     orders.forEach((order) => {
       order.items.forEach((item) => {
-        if (item.product && item.product._id) {
-          productDetailsMap[item.product._id] = item.product; // Directly use the product from orders
+        if (typeof item.product === "string" && !productDetails[item.product]) {
+          productIdsToFetch.add(item.product); // Collect missing product IDs
         }
       });
     });
   
-    console.log("Setting product details:", productDetailsMap);
-    setProductDetails(productDetailsMap);
+    // Fetch details for missing product IDs
+    productIdsToFetch.forEach((productId) => {
+      dispatch(fetchProductDetails(productId)).then((response) => {
+        if (response.payload) {
+          setProductDetails((prev) => ({
+            ...prev,
+            [productId]: response.payload,
+          }));
+        }
+      });
+    });
+  }, [orders, dispatch]);
   
-  }, [orders]);
   
   
 
