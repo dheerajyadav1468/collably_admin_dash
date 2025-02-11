@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
-import { fetchAllOrders, fetchProductDetails } from "../../app/store/orderSlice"
+import { fetchAllOrders, fetchBrandOrders, fetchProductDetails } from "../../app/store/orderSlice"
 import { Filter, Search } from "lucide-react"
 
 interface Order {
@@ -30,68 +30,91 @@ interface ProductDetails {
 }
 
 export default function OrderTable() {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const { orders, status, error } = useSelector((state: RootState) => state.orders);
-  const [productDetails, setProductDetails] = useState<{ [key: string]: ProductDetails }>({});
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const { orders, status, error } = useSelector((state: RootState) => state.orders)
+  const [productDetails, setProductDetails] = useState<{ [key: string]: ProductDetails }>({})
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     user: "",
     product: "",
     status: "",
-  });
-  const [searchTerm, setSearchTerm] = useState("");
+  })
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    dispatch(fetchAllOrders());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const uniqueProductIds = new Set(orders.flatMap(order => order.items.map(item => item.product)));
-      for (const productId of uniqueProductIds) {
-        const result = await dispatch(fetchProductDetails(productId));
-        if (fetchProductDetails.fulfilled.match(result)) {
-          setProductDetails(prev => ({ ...prev, [productId]: result.payload }));
-        }
+    const userType = localStorage.getItem("userType")
+    if (userType === "admin") {
+      dispatch(fetchAllOrders())
+    } else if (userType !== "admin") {
+      const brandId = localStorage.getItem("brandId")
+      if (brandId) {
+        dispatch(fetchBrandOrders(brandId))
       }
-    };
-
-    if (orders.length > 0) {
-      fetchProducts();
     }
-  }, [orders, dispatch]);
+  }, [dispatch])
+
+  useEffect(() => {
+    console.log("useEffect triggered! Orders:", orders);
+  
+    if (!Array.isArray(orders) || orders.length === 0) {
+      console.log("No orders available.");
+      return;
+    }
+  
+    // Extract product details directly from orders
+    const productDetailsMap = {};
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
+        if (item.product && item.product._id) {
+          productDetailsMap[item.product._id] = item.product; // Directly use the product from orders
+        }
+      });
+    });
+  
+    console.log("Setting product details:", productDetailsMap);
+    setProductDetails(productDetailsMap);
+  
+  }, [orders]);
+  
+  
+
+  useEffect(() => {
+    console.log("Current productDetails:", productDetails)
+  }, [productDetails])
 
   const handleViewClick = (orderId: string) => {
-    router.push(`/orderDetails?id=${orderId}`);
-  };
+    router.push(`/orderDetails?id=${orderId}`)
+  }
 
   const handleFilterChange = (filterName: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filterName]: value }));
-  };
+    setFilters((prev) => ({ ...prev, [filterName]: value }))
+  }
 
   const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+    setShowFilters(!showFilters)
+  }
 
-  const filteredOrders = orders.filter((order: Order) => {
+  const filteredOrders = (orders || []).filter((order: Order) => {
     return (
       (!filters.user || order.user.fullname.toLowerCase().includes(filters.user.toLowerCase())) &&
-      (!filters.product || order.items.some(item => 
-        productDetails[item.product]?.productname.toLowerCase().includes(filters.product.toLowerCase())
-      )) &&
+      (!filters.product ||
+        order.items.some((item) =>
+          productDetails[item.product]?.productname.toLowerCase().includes(filters.product.toLowerCase()),
+        )) &&
       (!filters.status || order.orderStatus.toLowerCase() === filters.status.toLowerCase()) &&
       (!searchTerm ||
         order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.items.some(item => 
-          productDetails[item.product]?.productname.toLowerCase().includes(searchTerm.toLowerCase())
+        order.items.some((item) =>
+          productDetails[item.product]?.productname.toLowerCase().includes(searchTerm.toLowerCase()),
         ))
-    );
-  });
+    )
+  })
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "failed") return <div>Error: {error}</div>;
+  if (status === "loading") return <div>Loading...</div>
+  if (status === "failed") return <div>Error: {error}</div>
+
   return (
     <div className="p-4 bg-dark text-gray rounded-lg w-full">
       <div className="mb-6">
@@ -149,8 +172,7 @@ export default function OrderTable() {
               <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">User</th>
               <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Product</th>
               <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Total Amount</th>
-              {/* <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Order Status</th> */}
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base" >Actions</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -161,39 +183,40 @@ export default function OrderTable() {
               >
                 <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">{order._id}</td>
                 <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user.fullname}</td>
-                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white" style={{
-    display: 'flex',
-    flexDirection: 'column',
-  }}>
-                {order.items.map((item, index) => (
-  <span key={index}>
-    {productDetails[item.product]?.productname || 'Loading...'}
-    {index < order.items.length - 1 ? ', ' : ''}
-  </span>
-))}
+                <td
+                  className="px-2 py-4 text-center font-medium text-dark dark:text-white"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                {order.items.map((item, index) => {
+  console.log("Checking item:", item);
+
+  if (!item.product || !item.product._id) {
+    console.error("Error: item.product is null or missing _id!", item);
+    return <span key={index}>Error loading product</span>;
+  }
+
+  const product = orders
+    .flatMap(o => o.items)
+    .find(i => i.product && i.product._id === item.product._id)?.product;
+
+  console.log("Found product:", product);
+
+  return (
+    <span key={index}>
+      {product ? product.productname : "Loading..."}
+      {index < order.items.length - 1 ? ", " : ""}
+    </span>
+  );
+})}
+
 
                 </td>
                 <td className="px-2 py-4 text-center font-medium text-green-light-1">₹{order.totalAmount}</td>
-                {/* <td className="px-2 py-4 text-center">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs ${
-                      order.orderStatus === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : order.orderStatus === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {order.orderStatus}
-                  </span>
-                </td> */}
                 <td className="px-2 py-4 text-center">
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => {
-                      /* Handle view action */
-                    }}
-                  >
+                  <button className="hover:text-primary" onClick={() => handleViewClick(order._id)}>
                     <svg
                       className="fill-current"
                       width="20"
@@ -211,7 +234,7 @@ export default function OrderTable() {
                       <path
                         fillRule="evenodd"
                         clipRule="evenodd"
-                        d="M9.99935 2.70825C6.23757 2.70825 3.70376 4.96175 2.23315 6.8723L2.20663 6.90675C1.87405 7.3387 1.56773 7.73652 1.35992 8.20692C1.13739 8.71064 1.04102 9.25966 1.04102 9.99992C1.04102 10.7402 1.13739 11.2892 1.35992 11.7929C1.56773 12.2633 1.87405 12.6611 2.20664 13.0931L2.23316 13.1275C3.70376 15.0381 6.23757 17.2916 9.99935 17.2916C13.7611 17.2916 16.2949 15.0381 17.7655 13.1275L17.792 13.0931C18.1246 12.6612 18.431 12.2633 18.6388 11.7929C18.8613 11.2892 18.9577 10.7402 18.9577 9.99992C18.9577 9.25966 18.8613 8.71064 18.6388 8.20692C18.431 7.73651 18.1246 7.33868 17.792 6.90673L17.7655 6.8723C16.2949 4.96175 13.7611 2.70825 9.99935 2.70825ZM3.2237 7.63475C4.58155 5.87068 6.79132 3.95825 9.99935 3.95825C13.2074 3.95825 15.4172 5.87068 16.775 7.63475C17.1405 8.10958 17.3546 8.3933 17.4954 8.71204C17.627 9.00993 17.7077 9.37403 17.7077 9.99992C17.7077 10.6258 17.627 10.9899 17.4954 11.2878C17.3546 11.6065 17.1405 11.8903 16.775 12.3651C15.4172 14.1292 13.2074 16.0416 9.99935 16.0416C6.79132 16.0416 4.58155 14.1292 3.2237 12.3651C2.85821 11.8903 2.64413 11.6065 2.50332 11.2878C2.37171 10.9899 2.29102 10.6258 2.29102 9.99992C2.29102 9.37403 2.37171 9.00993 2.50332 8.71204C2.64413 8.3933 2.85821 8.10958 3.2237"
+                        d="M9.99935 2.70825C6.23757 2.70825 3.70376 4.96175 2.23315 6.8723L2.20663 6.90675C1.87405 7.3387 1.56773 7.73652 1.35992 8.20692C1.13739 8.71064 1.04102 9.25966 1.04102 9.99992C1.04102 10.7402 1.13739 11.2892 1.35992 11.7929C1.56773 12.2633 1.87405 12.6611 2.20664 13.0931L2.23316 13.1275C3.70376 15.0381 6.23757 17.2916 9.99935 17.2916C13.7611 17.2916 16.2949 15.0381 17.7655 13.1275L17.792 13.0931C18.1246 12.6612 18.431 12.2633 18.6388 11.7929C18.8613 11.2892 18.9577 10.7402 18.9577 9.99992C18.9577 9.25966 18.8613 8.71064 18.6388 8.20692C18.431 7.73651 18.1246 7.33868 17.792 6.90673L17.7655 6.8723C16.2949 4.96175 13.7611 2.70825 9.99935 2.70825ZM3.2237 7.63475C4.58155 5.87068 6.79132 3.95825 9.99935 3.95825C13.2074 3.95825 15.4172 5.87068 16.775 7.63475C17.1405 8.10958 17.3546 8.3933 17.4954 8.71204C17.627 9.00993 17.7077 9.37403 17.7077 9.99992C17.7077 10.6258 17.627 10.9899 17.4954 11.2878C17.3546 11.6065 17.1405 11.8903 16.775 12.3651C15.4172 14.1292 13.2074 16.0416 9.99935 16.0416C6.79132 16.0416 4.58155 14.1292 3.2237 12.3651C2.85821 11.8903 2.64413 11.6065 2.50332 11.2878C2.37171 10.9899 2.29102 10.6258 2.29102 9.99992C2.29102 9.37403 2.37171 9.00993 2.50332 8.71204C2.64413 8.3933 2.85821 8.10958 3.2237 7.63475Z"
                         fill=""
                       />
                     </svg>
@@ -225,6 +248,4 @@ export default function OrderTable() {
     </div>
   )
 }
-
-
 

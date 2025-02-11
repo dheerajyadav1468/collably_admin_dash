@@ -10,6 +10,7 @@ export interface Order {
   }
   items: Array<{
     product: string
+    productname:string
     quantity: number
     price: number
   }>
@@ -34,12 +35,35 @@ const initialState: OrdersState = {
 }
 
 export const fetchAllOrders = createAsyncThunk("orders/fetchAllOrders", async () => {
-  const response = await fetch(API_ROUTES.GET_ALL_ORDERS)
+  const token = localStorage.getItem("token");
+  console.log("Token:", token);
+
+  const response = await fetch(API_ROUTES.GET_ALL_ORDERS, {
+    headers: {
+      Authorization: token,
+    },
+  });
+
   if (!response.ok) {
-    throw new Error("Failed to fetch orders")
+    throw new Error("Failed to fetch orders");
   }
-  return await response.json()
+
+  const data = await response.json();
+  console.log("Fetched Orders Data:", data); 
+  return data;
+});
+
+
+export const fetchBrandOrders = createAsyncThunk("orders/fetchBrandOrders", async (brandId: string) => {
+  const response = await fetch(API_ROUTES.GET_BRAND_ORDERS(brandId))
+  const data = await response.json()
+  console.log(data) 
+  if (!response.ok) {
+    throw new Error("Failed to fetch brand orders")
+  }
+  return data
 })
+
 
 export const fetchProductDetails = createAsyncThunk("orders/fetchProductDetails", async (productId: string) => {
   const response = await fetch(API_ROUTES.GET_PRODUCT(productId))
@@ -66,9 +90,23 @@ const ordersSlice = createSlice({
         state.status = "failed"
         state.error = action.error.message || "Failed to fetch orders"
       })
-      .addCase(fetchProductDetails.fulfilled, (state, action) => {
-        // You can add logic here if needed to update the state with product details
+      .addCase(fetchBrandOrders.pending, (state) => {
+        state.status = 'loading';
       })
+      .addCase(fetchBrandOrders.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.orders = action.payload;
+      })
+      .addCase(fetchBrandOrders.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(fetchProductDetails.fulfilled, (state, action) => {
+        console.log("Updating productDetails in Redux:", action.payload);
+      
+      
+      })
+      
   },
 })
 

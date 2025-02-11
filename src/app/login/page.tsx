@@ -45,12 +45,11 @@ const LoginForm = () => {
         localStorage.setItem("isLoggedIn", "true")
         localStorage.setItem("userType", "admin")
         localStorage.setItem("userName", data.user.fullname)
-        localStorage.setItem("token", data.token)
+        localStorage.setItem("token", data.access_token)
         console.log(data)
         console.log(data.user.fullname)
         setError(null)
 
-        // Fetch all products after successful login
         await dispatch(fetchAllProducts())
 
         router.push("/")
