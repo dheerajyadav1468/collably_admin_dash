@@ -36,7 +36,7 @@ const DropdownNotification = () => {
   const [notifying, setNotifying] = useState(true);
 
   return (
-    <ClickOutside onClick={() => setDropdownOpen(false)} className="relative hidden sm:block">
+    <ClickOutside onClickOutside={() => setDropdownOpen(false)} className="relative hidden sm:block">
       <li>
         <Link
           onClick={() => {

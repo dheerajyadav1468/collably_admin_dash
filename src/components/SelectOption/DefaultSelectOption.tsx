@@ -11,7 +11,7 @@ const DefaultSelectOption = ({ options }: any) => {
   };
 
   return (
-    <ClickOutside onClick={() => setIsOpen(false)}>
+    <ClickOutside onClickOutside={() => setIsOpen(false)}>
       <div className="relative z-20 inline-flex cursor-pointer appearance-none rounded-[5px] border border-stroke bg-white text-sm font-medium outline-none dark:border-dark-3 dark:bg-dark-2">
         <div
           className={`py-[5px] pl-[9px] pr-[35px] text-sm font-medium text-dark dark:text-white ${isOpen ? "open" : ""}`}
