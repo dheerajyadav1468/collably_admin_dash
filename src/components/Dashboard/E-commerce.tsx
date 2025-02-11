@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import ChartThree from "../Charts/ChartThree";
 import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
@@ -8,14 +8,19 @@ import MapOne from "../Maps/MapOne";
 import DataStatsOne from "../../components/DataStats/DataStatsOne";
 import DataStatsTwo from "../../components/DataStats/DataStatsTwo";
 import ChartOne from "../../components/Charts/ChartOne";
-import PanelNavigation from "../../components/DataStats/cardTwo"
-
+import PanelNavigation from "../../components/DataStats/cardTwo";
 
 const ECommerce: React.FC = () => {
+  const [activePanel, setActivePanel] = useState<"customer" | "brand">("brand");
+
+  const handlePanelChange = (panel: "customer" | "brand") => {
+    setActivePanel(panel);
+  };
+
   return (
     <>
-    < PanelNavigation />
-    <DataStatsOne />
+      <PanelNavigation activePanel={activePanel} onPanelChange={handlePanelChange} />
+      <DataStatsOne />
       <DataStatsTwo />
       
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
