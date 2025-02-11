@@ -33,7 +33,8 @@ const ProfileUser = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">{currentUser.fullname}'s Profile</h2>
+      <h2 className="text-2xl font-bold">{currentUser.fullname}&apos;s Profile</h2>
+
         <button
           onClick={handleEditClick}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
