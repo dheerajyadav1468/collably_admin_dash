@@ -3,13 +3,14 @@ import brandsReducer from "../store/brandSlice";
 import productsReducer from "../store/prductSlice"; // Fix typo: "prductSlice" -> "productSlice"
 import usersReducer from "../store/userSlice";
 import ordersReducer from "../store/orderSlice";
-
+import referralReducer from "../store/referalSlice";
 export const store = configureStore({
   reducer: {
     brands: brandsReducer,
     products: productsReducer,
     users: usersReducer,
     orders: ordersReducer,
+    referrals: referralReducer,
   },
 });
 
