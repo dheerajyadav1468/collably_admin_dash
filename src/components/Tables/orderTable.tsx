@@ -19,7 +19,7 @@ interface Order {
     username: string;
   };
   items: Array<{
-    product: string;
+    product: string | { _id: string; productname: string }; // Assuming product can be a string or an object
     quantity: number;
     price: number;
   }>;
@@ -37,7 +37,7 @@ export default function OrderTable() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { orders, status, error } = useSelector(
-    (state: RootState) => state.orders,
+    (state: RootState) => state.orders
   );
   const [productDetails, setProductDetails] = useState<{
     [key: string]: ProductDetails;
@@ -96,6 +96,7 @@ export default function OrderTable() {
   const handleViewClick = (orderId: string) => {
     router.push(`/orderDetails?id=${orderId}`);
   };
+  
 
   const handleFilterChange = (filterName: string, value: string) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }));
@@ -113,19 +114,20 @@ export default function OrderTable() {
           .includes(filters.user.toLowerCase())) &&
       (!filters.product ||
         order.items.some((item) =>
-          productDetails[item.product]?.productname
-            .toLowerCase()
-            .includes(filters.product.toLowerCase()),
+          (productDetails[item.product as keyof typeof productDetails]?.productname || "")
+  .toLowerCase()
+  .includes(filters.product.toLowerCase())
+        )
         )) &&
       (!filters.status ||
         order.orderStatus.toLowerCase() === filters.status.toLowerCase()) &&
       (!searchTerm ||
         order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.items.some((item) =>
-          productDetails[item.product]?.productname
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()),
-        ))
+          (productDetails[item.product as keyof typeof productDetails]?.productname || "")
+        .toLowerCase()
+        .includes(filters.product.toLowerCase())
+        )      
     );
   });
 
@@ -228,25 +230,24 @@ export default function OrderTable() {
                   {order.items.map((item, index) => {
                     console.log("Checking item:", item);
 
-                    if (!item.product || !item.product._id) {
-                      console.error(
-                        "Error: item.product is null or missing _id!",
-                        item,
-                      );
+                    if (!item.product) {
+                      console.error("Error: item.product is missing!", item);
                       return <span key={index}>Error loading product</span>;
                     }
 
-                    const product = orders
-                      .flatMap((o) => o.items)
-                      .find(
-                        (i) => i.product && i.product._id === item.product._id,
-                      )?.product;
+                    const product =
+                      typeof item.product === "string"
+                        ? productDetails[item.product]
+                        : item.product;
 
-                    console.log("Found product:", product);
+                    if (!product) {
+                      console.log("Product details not loaded yet", item.product);
+                      return <span key={index}>Loading...</span>;
+                    }
 
                     return (
                       <span key={index}>
-                        {product ? product.productname : "Loading..."}
+                        {product.productname}
                         {index < order.items.length - 1 ? ", " : ""}
                       </span>
                     );
@@ -277,7 +278,7 @@ export default function OrderTable() {
                       <path
                         fillRule="evenodd"
                         clipRule="evenodd"
-                        d="M9.99935 2.70825C6.23757 2.70825 3.70376 4.96175 2.23315 6.8723L2.20663 6.90675C1.87405 7.3387 1.56773 7.73652 1.35992 8.20692C1.13739 8.71064 1.04102 9.25966 1.04102 9.99992C1.04102 10.7402 1.13739 11.2892 1.35992 11.7929C1.56773 12.2633 1.87405 12.6611 2.20664 13.0931L2.23316 13.1275C3.70376 15.0381 6.23757 17.2916 9.99935 17.2916C13.7611 17.2916 16.2949 15.0381 17.7655 13.1275L17.792 13.0931C18.1246 12.6612 18.431 12.2633 18.6388 11.7929C18.8613 11.2892 18.9577 10.7402 18.9577 9.99992C18.9577 9.25966 18.8613 8.71064 18.6388 8.20692C18.431 7.73651 18.1246 7.33868 17.792 6.90673L17.7655 6.8723C16.2949 4.96175 13.7611 2.70825 9.99935 2.70825ZM3.2237 7.63475C4.58155 5.87068 6.79132 3.95825 9.99935 3.95825C13.2074 3.95825 15.4172 5.87068 16.775 7.63475C17.1405 8.10958 17.3546 8.3933 17.4954 8.71204C17.627 9.00993 17.7077 9.37403 17.7077 9.99992C17.7077 10.6258 17.627 10.9899 17.4954 11.2878C17.3546 11.6065 17.1405 11.8903 16.775 12.3651C15.4172 14.1292 13.2074 16.0416 9.99935 16.0416C6.79132 16.0416 4.58155 14.1292 3.2237 12.3651C2.85821 11.8903 2.64413 11.6065 2.50332 11.2878C2.37171 10.9899 2.29102 10.6258 2.29102 9.99992C2.29102 9.37403 2.37171 9.00993 2.50332 8.71204C2.64413 8.3933 2.85821 8.10958 3.2237 7.63475Z"
+                        d="M9.99935 2.70825C6.23757 2.70825 3.70376 4.96175 2.23315 6.8723L2.20663 6.90675C1.87405 7.3387 1.56773 7.73652 1.35992 8.20692C1.13739 8.71064 1.04102 9.25966 1.04102 9.99992C1.04102 10.7402 1.13739 11.2892 1.35992 11.7929C1.56773 12.2633 1.87405 12.6611 2.20664 13.0931L2.23316 13.1275C3.70376 15.0381 6.23757 17.2916 9.99935 17.2916C13.7611 17.2916 16.2949 15.0381 17.7655 13.1275L17.792 13.0931C18.1246 12.6612 18.431 12.2633 18.6388 11.7929C18.8613 11.2892 18.9577 10.7402 18.9577 9.99992C18.9577 9.25966 18.8613 8.71064 18.6388 8.20692C18.431 7.73651 18.1246 7.33868 17.792 6.90673L17.7655 6.8723C16.2949 4.96175 13.7611 2.70825 9.99935 2.70825ZM3.2237 7.63475C4.58155 5.87068 6.79132 3.95825 9.99935 3.95825C13.2074 3.95825 15.4172 5.87068 16.775 7.63475C17.1405 8.10958 17.3546 8.3933 17.4954 8.71204C17.627 9.00993 17.7077 9.37403 17.7077 9.99992C17.7077 10.6258 17.627 10.9899 17.4954 11.2878C17.3546 11.6065 17.1405 11.8903 16.775 12.3651C15.4172 14.1292 13.2074 16.0416 9.99935 16.0416C6.79132 16.0416 4.58155 14.1292 3.2237 12.3651C2.85814 11.8903 2.64408 11.6065 2.50329 11.2878C2.3717 10.9899 2.29102 10.6258 2.29102 9.99992C2.29102 9.37403 2.3717 9.00993 2.50329 8.71204C2.64408 8.3933 2.85814 8.10958 3.2237 7.63475Z"
                         fill=""
                       />
                     </svg>

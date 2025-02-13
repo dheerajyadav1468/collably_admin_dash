@@ -1,5 +1,5 @@
 import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
-import TableOne from "../../components/Tables/TableOne";
+import ReferalTable  from "../../components/Tables/referalTable";
 
 import { Metadata } from "next";
 import DefaultLayout from "../../components/Layouts/DefaultLaout";
@@ -12,10 +12,11 @@ export const metadata: Metadata = {
 const TablesPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Tables" />
+      <Breadcrumb pageName="Affiliate Tracking" />
 
       <div className="flex flex-col gap-10">
-        <TableOne />
+        {/* <TableOne /> */}
+        <ReferalTable/>
       
       </div>
     </DefaultLayout>
