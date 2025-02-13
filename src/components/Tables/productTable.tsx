@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchAllProducts, deleteProduct, fetchBrandProducts } from "../../app/store/prductSlice"
 import { fetchAllBrands } from "../../app/store/brandSlice"
 import Link from "next/link"
-import { Filter, Plus, Search } from "lucide-react"
+import { Filter, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 const ProductsTable = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -28,6 +28,8 @@ const ProductsTable = () => {
   const [userType, setUserType] = useState<string | null>(null)
   const [brandId, setBrandId] = useState<string | null>(null)
   const [brandName, setBrandName] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 10
 
   useEffect(() => {
     const userType = localStorage.getItem("userType")
@@ -84,22 +86,15 @@ const ProductsTable = () => {
     return (
       (!filters.brand || product.brandId === filters.brand) &&
       (!filters.category || product.category === filters.category) &&
-      (!filters.stockStatus ||
-        (filters.stockStatus === "In Stock"
-          ? product.quantity > 0
-          : product.quantity === 0)) &&
+      (!filters.stockStatus || (filters.stockStatus === "In Stock" ? product.quantity > 0 : product.quantity === 0)) &&
       (!filters.status || product.status === filters.status) &&
-      (!filters.product ||
-        product.productname
-          .toLowerCase()
-          .includes(filters.product.toLowerCase())) &&
-      (!searchTerm ||
-        product.productname.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  });
+      (!filters.product || product.productname.toLowerCase().includes(filters.product.toLowerCase())) &&
+      (!searchTerm || product.productname.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  })
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "failed") return <div>Error: {error}</div>;
+  if (status === "loading") return <div>Loading...</div>
+  if (status === "failed") return <div>Error: {error}</div>
 
   if (error) {
     return (
@@ -110,6 +105,14 @@ const ProductsTable = () => {
   }
 
   const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"]
+
+  // Get current products
+  const indexOfLastProduct = currentPage * productsPerPage
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
+
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
   return (
     <div className="p-4 bg-dark text-gray rounded-lg w-full">
@@ -220,10 +223,10 @@ const ProductsTable = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((product, key) => (
+              {currentProducts.map((product, key) => (
                 <tr
                   key={product._id}
-                  className={key === filteredProducts.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
+                  className={key === currentProducts.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
                 >
                   <td className="flex items-center gap-3.5 px-2 py-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
@@ -314,6 +317,33 @@ const ProductsTable = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <div className="mt-4 flex items-center justify-between">
+            <div>
+              Showing {indexOfFirstProduct + 1} to {Math.min(indexOfLastProduct, filteredProducts.length)} of{" "}
+              {filteredProducts.length} entries
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 rounded-md bg-gray-100 text-gray-600 disabled:opacity-50"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <span>
+                {currentPage} of {Math.ceil(filteredProducts.length / productsPerPage)}
+              </span>
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={indexOfLastProduct >= filteredProducts.length}
+                className="p-2 rounded-md bg-gray-100 text-gray-600 disabled:opacity-50"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -321,3 +351,4 @@ const ProductsTable = () => {
 }
 
 export default ProductsTable
+
