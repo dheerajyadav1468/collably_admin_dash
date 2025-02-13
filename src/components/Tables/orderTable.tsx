@@ -1,65 +1,73 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch, RootState } from "../../app/store/store"
-import { fetchAllOrders, fetchBrandOrders, fetchProductDetails } from "../../app/store/orderSlice"
-import { Filter, Search } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../app/store/store";
+import {
+  fetchAllOrders,
+  fetchBrandOrders,
+  fetchProductDetails,
+} from "../../app/store/orderSlice";
+import { Filter, Search } from "lucide-react";
 
 interface Order {
-  _id: string
+  _id: string;
   user: {
-    _id: string
-    fullname: string
-    username: string
-  }
+    _id: string;
+    fullname: string;
+    username: string;
+  };
   items: Array<{
-    product: string
-    quantity: number
-    price: number
-  }>
-  totalAmount: number
-  orderStatus: string
-  createdAt: string
+    product: string;
+    quantity: number;
+    price: number;
+  }>;
+  totalAmount: number;
+  orderStatus: string;
+  createdAt: string;
 }
 
 interface ProductDetails {
-  _id: string
-  productname: string
+  _id: string;
+  productname: string;
 }
 
 export default function OrderTable() {
-  const dispatch = useDispatch<AppDispatch>()
-  const router = useRouter()
-  const { orders, status, error } = useSelector((state: RootState) => state.orders)
-  const [productDetails, setProductDetails] = useState<{ [key: string]: ProductDetails }>({})
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const { orders, status, error } = useSelector(
+    (state: RootState) => state.orders,
+  );
+  const [productDetails, setProductDetails] = useState<{
+    [key: string]: ProductDetails;
+  }>({});
 
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     user: "",
     product: "",
     status: "",
-  })
-  const [searchTerm, setSearchTerm] = useState("")
+  });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const userType = localStorage.getItem("userType")
+    const userType = localStorage.getItem("userType");
     if (userType === "admin") {
-      dispatch(fetchAllOrders())
+      dispatch(fetchAllOrders());
     } else if (userType !== "admin") {
-      const brandId = localStorage.getItem("brandId")
+      const brandId = localStorage.getItem("brandId");
       if (brandId) {
-        dispatch(fetchBrandOrders(brandId))
+        dispatch(fetchBrandOrders(brandId));
       }
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     if (!Array.isArray(orders) || orders.length === 0) return;
-  
+
     const productIdsToFetch = new Set<string>();
-  
+
     orders.forEach((order) => {
       order.items.forEach((item) => {
         if (typeof item.product === "string" && !productDetails[item.product]) {
@@ -67,7 +75,7 @@ export default function OrderTable() {
         }
       });
     });
-  
+
     // Fetch details for missing product IDs
     productIdsToFetch.forEach((productId) => {
       dispatch(fetchProductDetails(productId)).then((response) => {
@@ -80,47 +88,52 @@ export default function OrderTable() {
       });
     });
   }, [orders, dispatch]);
-  
-  
-  
 
   useEffect(() => {
-    console.log("Current productDetails:", productDetails)
-  }, [productDetails])
+    console.log("Current productDetails:", productDetails);
+  }, [productDetails]);
 
   const handleViewClick = (orderId: string) => {
-    router.push(`/orderDetails?id=${orderId}`)
-  }
+    router.push(`/orderDetails?id=${orderId}`);
+  };
 
   const handleFilterChange = (filterName: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filterName]: value }))
-  }
+    setFilters((prev) => ({ ...prev, [filterName]: value }));
+  };
 
   const toggleFilters = () => {
-    setShowFilters(!showFilters)
-  }
+    setShowFilters(!showFilters);
+  };
 
   const filteredOrders = (orders || []).filter((order: Order) => {
     return (
-      (!filters.user || order.user.fullname.toLowerCase().includes(filters.user.toLowerCase())) &&
+      (!filters.user ||
+        order.user.fullname
+          .toLowerCase()
+          .includes(filters.user.toLowerCase())) &&
       (!filters.product ||
         order.items.some((item) =>
-          productDetails[item.product]?.productname.toLowerCase().includes(filters.product.toLowerCase()),
+          productDetails[item.product]?.productname
+            .toLowerCase()
+            .includes(filters.product.toLowerCase()),
         )) &&
-      (!filters.status || order.orderStatus.toLowerCase() === filters.status.toLowerCase()) &&
+      (!filters.status ||
+        order.orderStatus.toLowerCase() === filters.status.toLowerCase()) &&
       (!searchTerm ||
         order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.items.some((item) =>
-          productDetails[item.product]?.productname.toLowerCase().includes(searchTerm.toLowerCase()),
+          productDetails[item.product]?.productname
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()),
         ))
-    )
-  })
+    );
+  });
 
-  if (status === "loading") return <div>Loading...</div>
-  if (status === "failed") return <div>Error: {error}</div>
+  if (status === "loading") return <div>Loading...</div>;
+  if (status === "failed") return <div>Error: {error}</div>;
 
   return (
-    <div className="p-4 bg-dark text-gray rounded-lg w-full">
+    <div className="w-full rounded-lg bg-dark p-4 text-gray">
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Orders</h1>
@@ -144,14 +157,14 @@ export default function OrderTable() {
               value={filters.user}
               onChange={(e) => handleFilterChange("user", e.target.value)}
               placeholder="Filter by user"
-              className="w-full rounded-md border p-2 bg-black text-gray"
+              className="w-full rounded-md border bg-black p-2 text-gray"
             />
             <input
               type="text"
               value={filters.product}
               onChange={(e) => handleFilterChange("product", e.target.value)}
               placeholder="Filter by product"
-              className="w-full rounded-md border p-2 bg-black text-gray"
+              className="w-full rounded-md border bg-black p-2 text-gray"
             />
           </div>
         )}
@@ -172,21 +185,39 @@ export default function OrderTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-stroke dark:border-dark-3">
-              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">Order ID</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">User</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Product</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Total Amount</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Actions</th>
+              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">
+                Order ID
+              </th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
+                User
+              </th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
+                Product
+              </th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
+                Total Amount
+              </th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {filteredOrders.map((order, key) => (
               <tr
                 key={order._id}
-                className={key === filteredOrders.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
+                className={
+                  key === filteredOrders.length - 1
+                    ? ""
+                    : "border-b border-stroke dark:border-dark-3"
+                }
               >
-                <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">{order._id}</td>
-                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user.fullname}</td>
+                <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">
+                  {order._id}
+                </td>
+                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
+                  {order.user.fullname}
+                </td>
                 <td
                   className="px-2 py-4 text-center font-medium text-dark dark:text-white"
                   style={{
@@ -194,33 +225,41 @@ export default function OrderTable() {
                     flexDirection: "column",
                   }}
                 >
-                {order.items.map((item, index) => {
-  console.log("Checking item:", item);
+                  {order.items.map((item, index) => {
+                    console.log("Checking item:", item);
 
-  if (!item.product || !item.product._id) {
-    console.error("Error: item.product is null or missing _id!", item);
-    return <span key={index}>Error loading product</span>;
-  }
+                    if (!item.product || !item.product._id) {
+                      console.error(
+                        "Error: item.product is null or missing _id!",
+                        item,
+                      );
+                      return <span key={index}>Error loading product</span>;
+                    }
 
-  const product = orders
-    .flatMap(o => o.items)
-    .find(i => i.product && i.product._id === item.product._id)?.product;
+                    const product = orders
+                      .flatMap((o) => o.items)
+                      .find(
+                        (i) => i.product && i.product._id === item.product._id,
+                      )?.product;
 
-  console.log("Found product:", product);
+                    console.log("Found product:", product);
 
-  return (
-    <span key={index}>
-      {product ? product.productname : "Loading..."}
-      {index < order.items.length - 1 ? ", " : ""}
-    </span>
-  );
-})}
-
-
+                    return (
+                      <span key={index}>
+                        {product ? product.productname : "Loading..."}
+                        {index < order.items.length - 1 ? ", " : ""}
+                      </span>
+                    );
+                  })}
                 </td>
-                <td className="px-2 py-4 text-center font-medium text-green-light-1">₹{order.totalAmount}</td>
+                <td className="px-2 py-4 text-center font-medium text-green-light-1">
+                  ₹{order.totalAmount}
+                </td>
                 <td className="px-2 py-4 text-center">
-                  <button className="hover:text-primary" onClick={() => handleViewClick(order._id)}>
+                  <button
+                    className="hover:text-primary"
+                    onClick={() => handleViewClick(order._id)}
+                  >
                     <svg
                       className="fill-current"
                       width="20"
@@ -250,6 +289,5 @@ export default function OrderTable() {
         </table>
       </div>
     </div>
-  )
+  );
 }
-
