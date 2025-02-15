@@ -4,6 +4,7 @@ import { API_ROUTES } from "../apiroutes"
 export interface Product {
   _id: string
   brandId: string
+  brandid: string
   productname: string
   description: string
   price: number

@@ -1,138 +1,131 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../app/store/store";
-import {
-  fetchAllOrders,
-  fetchBrandOrders,
-  fetchProductDetails,
-} from "../../app/store/orderSlice";
-import { Filter, Search } from "lucide-react";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../../app/store/store"
+import { fetchAllOrders, fetchBrandOrders, fetchProductDetails } from "../../app/store/orderSlice"
+import { Filter, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 interface Order {
-  _id: string;
+  _id: string
   user: {
-    _id: string;
-    fullname: string;
-    username: string;
-  };
+    _id: string
+    fullname: string
+    username: string
+  }
   items: Array<{
-    product: string | { _id: string; productname: string }; // Assuming product can be a string or an object
-    quantity: number;
-    price: number;
-  }>;
-  totalAmount: number;
-  orderStatus: string;
-  createdAt: string;
+    product: string | { _id: string; productname: string }
+    quantity: number
+    price: number
+  }>
+  totalAmount: number
+  orderStatus: string
+  createdAt: string
 }
 
 interface ProductDetails {
-  _id: string;
-  productname: string;
+  _id: string
+  productname: string
 }
 
 export default function OrderTable() {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const { orders, status, error } = useSelector(
-    (state: RootState) => state.orders
-  );
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const { orders, status, error } = useSelector((state: RootState) => state.orders)
   const [productDetails, setProductDetails] = useState<{
-    [key: string]: ProductDetails;
-  }>({});
+    [key: string]: ProductDetails
+  }>({})
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     user: "",
     product: "",
-    status: "",
-  });
-  const [searchTerm, setSearchTerm] = useState("");
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const ordersPerPage = 10
 
   useEffect(() => {
-    const userType = localStorage.getItem("userType");
+    const userType = localStorage.getItem("userType")
     if (userType === "admin") {
-      dispatch(fetchAllOrders());
+      dispatch(fetchAllOrders())
     } else if (userType !== "admin") {
-      const brandId = localStorage.getItem("brandId");
+      const brandId = localStorage.getItem("brandId")
       if (brandId) {
-        dispatch(fetchBrandOrders(brandId));
+        dispatch(fetchBrandOrders(brandId))
       }
     }
-  }, [dispatch]);
+  }, [dispatch])
 
   useEffect(() => {
-    if (!Array.isArray(orders) || orders.length === 0) return;
+    if (!Array.isArray(orders) || orders.length === 0) return
 
-    const productIdsToFetch = new Set<string>();
+    const productIdsToFetch = new Set<string>()
 
     orders.forEach((order) => {
       order.items.forEach((item) => {
         if (typeof item.product === "string" && !productDetails[item.product]) {
-          productIdsToFetch.add(item.product); // Collect missing product IDs
+          productIdsToFetch.add(item.product)
         }
-      });
-    });
+      })
+    })
 
-    // Fetch details for missing product IDs
     productIdsToFetch.forEach((productId) => {
       dispatch(fetchProductDetails(productId)).then((response) => {
         if (response.payload) {
           setProductDetails((prev) => ({
             ...prev,
             [productId]: response.payload,
-          }));
+          }))
         }
-      });
-    });
-  }, [orders, dispatch]);
-
-  useEffect(() => {
-    console.log("Current productDetails:", productDetails);
-  }, [productDetails]);
+      })
+    })
+  }, [orders, dispatch, productDetails])
 
   const handleViewClick = (orderId: string) => {
-    router.push(`/orderDetails?id=${orderId}`);
-  };
-  
+    router.push(`/orderDetails?id=${orderId}`)
+  }
 
   const handleFilterChange = (filterName: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filterName]: value }));
-  };
+    setFilters((prev) => ({ ...prev, [filterName]: value }))
+  }
 
   const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+    setShowFilters(!showFilters)
+  }
 
   const filteredOrders = (orders || []).filter((order: Order) => {
-    return (
-      (!filters.user ||
-        order.user.fullname
-          .toLowerCase()
-          .includes(filters.user.toLowerCase())) &&
-      (!filters.product ||
-        order.items.some((item) =>
-          (productDetails[item.product as keyof typeof productDetails]?.productname || "")
-  .toLowerCase()
-  .includes(filters.product.toLowerCase())
-        )
-        )) &&
-      (!filters.status ||
-        order.orderStatus.toLowerCase() === filters.status.toLowerCase()) &&
-      (!searchTerm ||
-        order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.items.some((item) =>
-          (productDetails[item.product as keyof typeof productDetails]?.productname || "")
-        .toLowerCase()
-        .includes(filters.product.toLowerCase())
-        )      
-    );
-  });
+    const matchesUser = !filters.user || order.user.fullname.toLowerCase().includes(filters.user.toLowerCase())
+    const matchesProduct =
+      !filters.product ||
+      order.items.some((item) => {
+        const productName =
+          typeof item.product === "string"
+            ? productDetails[item.product]?.productname
+            : (item.product as { productname: string })?.productname
+        return productName && productName.toLowerCase().includes(filters.product.toLowerCase())
+      })
+    const matchesSearch =
+      !searchTerm ||
+      order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.items.some((item) => {
+        const productName =
+          typeof item.product === "string"
+            ? productDetails[item.product]?.productname
+            : (item.product as { productname: string })?.productname
+        return productName && productName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "failed") return <div>Error: {error}</div>;
+    return matchesUser && matchesProduct && matchesSearch
+  })
+
+  const indexOfLastOrder = currentPage * ordersPerPage
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
+
+  if (status === "loading") return <div>Loading...</div>
+  if (status === "failed") return <div>Error: {error}</div>
 
   return (
     <div className="w-full rounded-lg bg-dark p-4 text-gray">
@@ -187,80 +180,35 @@ export default function OrderTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-stroke dark:border-dark-3">
-              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">
-                Order ID
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                User
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Product
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Total Amount
-              </th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-                Actions
-              </th>
+              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">Order ID</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">User</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Product</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Total Amount</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order, key) => (
+            {currentOrders.map((order, key) => (
               <tr
                 key={order._id}
-                className={
-                  key === filteredOrders.length - 1
-                    ? ""
-                    : "border-b border-stroke dark:border-dark-3"
-                }
+                className={key === currentOrders.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
               >
-                <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">
-                  {order._id}
-                </td>
+                <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">{order._id}</td>
+                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user.fullname}</td>
                 <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
-                  {order.user.fullname}
-                </td>
-                <td
-                  className="px-2 py-4 text-center font-medium text-dark dark:text-white"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
                   {order.items.map((item, index) => {
-                    console.log("Checking item:", item);
-
-                    if (!item.product) {
-                      console.error("Error: item.product is missing!", item);
-                      return <span key={index}>Error loading product</span>;
-                    }
-
-                    const product =
-                      typeof item.product === "string"
-                        ? productDetails[item.product]
-                        : item.product;
-
-                    if (!product) {
-                      console.log("Product details not loaded yet", item.product);
-                      return <span key={index}>Loading...</span>;
-                    }
-
+                    const product = typeof item.product === "string" ? productDetails[item.product] : item.product
                     return (
                       <span key={index}>
-                        {product.productname}
+                        {(product as ProductDetails)?.productname || "Loading..."}
                         {index < order.items.length - 1 ? ", " : ""}
                       </span>
-                    );
+                    )
                   })}
                 </td>
-                <td className="px-2 py-4 text-center font-medium text-green-light-1">
-                  ₹{order.totalAmount}
-                </td>
+                <td className="px-2 py-4 text-center font-medium text-green-light-1">₹{order.totalAmount}</td>
                 <td className="px-2 py-4 text-center">
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleViewClick(order._id)}
-                  >
+                  <button className="hover:text-primary" onClick={() => handleViewClick(order._id)}>
                     <svg
                       className="fill-current"
                       width="20"
@@ -288,7 +236,34 @@ export default function OrderTable() {
             ))}
           </tbody>
         </table>
+        {/* Pagination */}
+        <div className="mt-4 flex items-center justify-between">
+          <div>
+            Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, filteredOrders.length)} of{" "}
+            {filteredOrders.length} entries
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-md bg-gray-100 text-gray-600 disabled:opacity-50"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <span>
+              {currentPage} of {Math.ceil(filteredOrders.length / ordersPerPage)}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={indexOfLastOrder >= filteredOrders.length}
+              className="p-2 rounded-md bg-gray-100 text-gray-600 disabled:opacity-50"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 }
+

@@ -106,12 +106,12 @@ const ProductsTable = () => {
 
   const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"]
 
-  // Get current products
+
   const indexOfLastProduct = currentPage * productsPerPage
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
-  // Change page
+  
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
   return (

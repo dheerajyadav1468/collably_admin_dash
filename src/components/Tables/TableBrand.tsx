@@ -1,109 +1,110 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../app/store/store";
-import { fetchAllBrands, deleteBrand } from "../../app/store/brandSlice";
-import Link from "next/link";
-import { Plus } from "lucide-react";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch, RootState } from "../../app/store/store"
+import { fetchAllBrands, deleteBrand } from "../../app/store/brandSlice"
+import Link from "next/link"
+import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 const TableBrand = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const { brands, status, error } = useSelector(
-    (state: RootState) => state.brands,
-  );
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const { brands, status, error } = useSelector((state: RootState) => state.brands)
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const brandsPerPage = 10
 
   useEffect(() => {
-    dispatch(fetchAllBrands());
-  }, [dispatch]);
+    dispatch(fetchAllBrands())
+  }, [dispatch])
 
   const handleViewClick = (brandId: string) => {
-    router.push(`/profileBrand?id=${brandId}`);
-  };
+    router.push(`/profileBrand?id=${brandId}`)
+  }
 
   const handleEditClick = (brandId: string) => {
-    router.push(`/brandForm?id=${brandId}`);
-  };
+    router.push(`/brandForm?id=${brandId}`)
+  }
 
   const handleDeleteClick = async (brandId: string) => {
     if (window.confirm("Are you sure you want to delete this brand?")) {
       try {
-        await dispatch(deleteBrand(brandId)).unwrap();
-        alert("Brand deleted successfully");
+        await dispatch(deleteBrand(brandId)).unwrap()
+        alert("Brand deleted successfully")
       } catch (error) {
-        alert("Failed to delete brand");
+        alert("Failed to delete brand")
       }
     }
-  };
+  }
 
-  if (status === "loading") return <div>Loading...</div>;
-  if (status === "failed") return <div>Error: {error}</div>;
+  const filteredBrands = brands.filter(
+    (brand) =>
+      brand.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      brand.brandCategory.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  const indexOfLastBrand = currentPage * brandsPerPage
+  const indexOfFirstBrand = indexOfLastBrand - brandsPerPage
+  const currentBrands = filteredBrands.slice(indexOfFirstBrand, indexOfLastBrand)
+
+  if (status === "loading") return <div>Loading...</div>
+  if (status === "failed") return <div>Error: {error}</div>
 
   return (
     <div className="rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
       <div className="mb-4 flex items-center justify-between">
-      <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">
-        Top Brands
-      </h4>
-      <Link
-        href="/brandForm"
-        className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-      >
-        <Plus className="h-4 w-4" />
-        Add Brand
-      </Link>
+        <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">Top Brands</h4>
+        <Link
+          href="/brandForm"
+          className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4" />
+          Add Brand
+        </Link>
       </div>
+
+      <div className="relative mt-4 mb-6">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by brand name or category"
+          className="w-full rounded-md border bg-black p-2 pl-10"
+        />
+        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-500" />
+      </div>
+
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-stroke dark:border-dark-3">
-            <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">
-              Brand
-            </th>
-            <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-              Category
-            </th>
-            <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">
-              Email
-            </th>
+            <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">Brand</th>
+            <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Category</th>
+            <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Email</th>
             <th className="hidden px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base sm:table-cell">
               Action
             </th>
           </tr>
         </thead>
         <tbody>
-          {brands.map((brand, key) => (
+          {currentBrands.map((brand, key) => (
             <tr
               key={brand._id}
-              className={
-                key === brands.length - 1
-                  ? ""
-                  : "border-b border-stroke dark:border-dark-3"
-              }
+              className={key === currentBrands.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
             >
               <td className="flex items-center gap-3.5 px-2 py-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
-                  {brand.brandName
-                    ? brand.brandName.charAt(0).toUpperCase()
-                    : ""}
+                  {brand.brandName ? brand.brandName.charAt(0).toUpperCase() : ""}
                 </div>
 
-                <p className="hidden font-medium text-dark dark:text-white sm:block">
-                  {brand.brandName}
-                </p>
+                <p className="hidden font-medium text-dark dark:text-white sm:block">{brand.brandName}</p>
               </td>
-              <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
-                {brand.brandCategory}
-              </td>
-              <td className="px-2 py-4 text-center font-medium text-green-light-1">
-                {brand.contactEmail}
-              </td>
+              <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{brand.brandCategory}</td>
+              <td className="px-2 py-4 text-center font-medium text-green-light-1">{brand.contactEmail}</td>
               <td className="px-2 py-4 text-center sm:table-cell">
-                <button
-                  className="hover:text-primary"
-                  onClick={() => handleViewClick(brand._id)}
-                >
+                <button className="hover:text-primary" onClick={() => handleViewClick(brand._id)}>
                   <svg
                     className="fill-current"
                     width="20"
@@ -126,10 +127,7 @@ const TableBrand = () => {
                     />
                   </svg>
                 </button>
-                <button
-                  className="ml-3 hover:text-primary"
-                  onClick={() => handleEditClick(brand._id)}
-                >
+                <button className="ml-3 hover:text-primary" onClick={() => handleEditClick(brand._id)}>
                   <svg
                     className="fill-current"
                     width="20"
@@ -148,10 +146,7 @@ const TableBrand = () => {
                     />
                   </svg>
                 </button>
-                <button
-                  className="ml-3 hover:text-primary"
-                  onClick={() => handleDeleteClick(brand._id)}
-                >
+                <button className="ml-3 hover:text-primary" onClick={() => handleDeleteClick(brand._id)}>
                   <svg
                     className="fill-current"
                     width="20"
@@ -173,8 +168,35 @@ const TableBrand = () => {
           ))}
         </tbody>
       </table>
+      {/* Pagination */}
+      <div className="mt-4 flex items-center justify-between">
+        <div>
+          Showing {indexOfFirstBrand + 1} to {Math.min(indexOfLastBrand, filteredBrands.length)} of{" "}
+          {filteredBrands.length} entries
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="rounded-md bg-gray-100 p-2 text-gray-600 disabled:opacity-50"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <span>
+            {currentPage} of {Math.ceil(filteredBrands.length / brandsPerPage)}
+          </span>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={indexOfLastBrand >= filteredBrands.length}
+            className="rounded-md bg-gray-100 p-2 text-gray-600 disabled:opacity-50"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default TableBrand;
+export default TableBrand
+
