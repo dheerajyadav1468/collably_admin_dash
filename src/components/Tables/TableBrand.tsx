@@ -30,13 +30,13 @@ const TableBrand = () => {
   }
 
   const handleDeleteClick = async (brandId: string) => {
-    if (window.confirm("Are you sure you want to delete this brand?")) {
+   
       try {
         await dispatch(deleteBrand(brandId)).unwrap()
         alert("Brand deleted successfully")
       } catch (error) {
         alert("Failed to delete brand")
-      }
+      
     }
   }
 
@@ -199,4 +199,3 @@ const TableBrand = () => {
 }
 
 export default TableBrand
-

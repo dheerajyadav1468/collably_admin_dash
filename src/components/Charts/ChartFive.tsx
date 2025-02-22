@@ -1,10 +1,6 @@
-"use client"; 
-
-import dynamic from "next/dynamic"; 
 import { ApexOptions } from "apexcharts";
 import React from "react";
-
-const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
+import ReactApexChart from "react-apexcharts";
 
 const ChartFive: React.FC = () => {
   const series = [
@@ -125,4 +121,3 @@ const ChartFive: React.FC = () => {
 };
 
 export default ChartFive;
-

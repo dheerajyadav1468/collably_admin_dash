@@ -55,7 +55,7 @@ const ProductsTable = () => {
   }
 
   const handleDeleteClick = async (productId: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+
       try {
         await dispatch(deleteProduct(productId)).unwrap()
 
@@ -68,7 +68,7 @@ const ProductsTable = () => {
         alert("Product deleted successfully")
       } catch (error) {
         alert("Failed to delete product")
-      }
+      
     }
   }
 

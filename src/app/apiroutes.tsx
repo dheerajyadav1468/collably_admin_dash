@@ -1,13 +1,13 @@
-const BASE_URL = "http://127.0.0.1:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 export const API_ROUTES = {
   // Brand routes
-  CREATE_BRAND: `${BASE_URL}/brands`,
+  CREATE_BRAND: `${BASE_URL}/createbrand`,
   GET_ALL_BRANDS: `${BASE_URL}/brands`,
   GET_BRAND: (id: string) => `${BASE_URL}/brand/${id}`,
   DELETE_BRAND: (id: string) => `${BASE_URL}/brand/${id}`,
   UPDATE_BRAND: (id: string) => `${BASE_URL}/brandupdate/${id}`,
-  
+   
   // Product routes
   CREATE_PRODUCT: `${BASE_URL}/create/product`,
   GET_ALL_PRODUCTS: `${BASE_URL}/getallproducts`,
