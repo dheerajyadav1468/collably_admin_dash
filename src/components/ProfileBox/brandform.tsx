@@ -24,12 +24,7 @@ const BrandForm = () => {
     contactEmail: "",
     brandWebsite: "",
     brandPhoneNumber: "",
-    socialMediaLinks: {
-      facebook: "",
-      twitter: "",
-      instagram: "",
-      linkedin: "",
-    },
+   
     gstNumber: "",
     password: "",
   })
@@ -253,73 +248,7 @@ console.log(formDataToSend)
             />
           </div>
 
-          {/* Social Media Links */}
-          <div className="">
-            <label
-              htmlFor="socialMediaLinks.facebook"
-              className="block text-lg font-medium text-dark dark:text-white mb-2"
-            >
-              Facebook
-            </label>
-            <input
-              type="url"
-              id="socialMediaLinks.facebook"
-              name="socialMediaLinks.facebook"
-              value={formData.socialMediaLinks?.facebook}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="">
-            <label
-              htmlFor="socialMediaLinks.twitter"
-              className="block text-lg font-medium text-dark dark:text-white mb-2"
-            >
-              Twitter
-            </label>
-            <input
-              type="url"
-              id="socialMediaLinks.twitter"
-              name="socialMediaLinks.twitter"
-              value={formData.socialMediaLinks?.twitter}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="">
-            <label
-              htmlFor="socialMediaLinks.instagram"
-              className="block text-lg font-medium text-dark dark:text-white mb-2"
-            >
-              Instagram
-            </label>
-            <input
-              type="url"
-              id="socialMediaLinks.instagram"
-              name="socialMediaLinks.instagram"
-              value={formData.socialMediaLinks?.instagram}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="">
-            <label
-              htmlFor="socialMediaLinks.linkedin"
-              className="block text-lg font-medium text-dark dark:text-white mb-2"
-            >
-              LinkedIn
-            </label>
-            <input
-              type="url"
-              id="socialMediaLinks.linkedin"
-              name="socialMediaLinks.linkedin"
-              value={formData.socialMediaLinks?.linkedin}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          {/* GST Number */}
+                   {/* GST Number */}
           <div>
             <label htmlFor="gstNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">
               GST Number
