@@ -35,7 +35,8 @@ export default function CouponCreate() {
         <div className="ml-4 h-1 flex-1 rounded bg-muted">
           <div
             className="h-1 rounded bg-[#ff0055] transition-all"
-            style={{ width: ${((currentStep + 1) / steps.length) * 100}% }}
+            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+
           />
         </div>
       </div>

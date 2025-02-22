@@ -49,11 +49,12 @@ const ProductsTable = () => {
   }, [dispatch])
 
   const handleViewClick = (productId: string) => {
-    router.push(/profileProduct?id=${productId})
+    router.push(`/profileProduct?id=${productId}`);
+
   }
 
   const handleEditClick = (productId: string) => {
-    router.push(/productForm?id=${productId})
+    router.push(`/productForm?id=${productId}`)
   }
 
   const handleDeleteClick = async (productId: string) => {
@@ -118,7 +119,7 @@ const ProductsTable = () => {
     <div className="p-4 bg-dark text-gray rounded-lg w-full">
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{userType === "admin" ? "All Products" : ${brandName}'s Products}</h1>
+          <h1 className="text-2xl font-bold">{userType === "admin" ? "All Products" : `${brandName}'s Products`}</h1>
           <div className="flex gap-2">
             <Link
               href="/productForm"
