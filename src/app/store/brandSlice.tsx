@@ -2,22 +2,22 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { API_ROUTES } from '../../app/apiroutes';
 
 export interface Brand {
-  _id: string;
-  brandName: string;
-  brandLogo?: string;
-  brandDescription: string;
-  brandCategory: string;
-  contactEmail: string;
-  brandWebsite: string;
-  brandPhoneNumber: string;
+  _id: string
+  brandName: string
+  media?: string 
+  brandDescription: string
+  brandCategory: string
+  contactEmail: string
+  brandWebsite: string
+  brandPhoneNumber: string
   socialMediaLinks: {
-    facebook: string;
-    twitter: string;
-    instagram: string;
-    linkedin: string;
-  };
-  gstNumber: string;
-  password?: string; // Add this line if 'password' is valid
+    facebook: string
+    twitter: string
+    instagram: string
+    linkedin: string
+  }
+  gstNumber: string
+  password?: string
 }
 
 
@@ -36,21 +36,38 @@ const initialState: BrandsState = {
 };
 
 export const createBrand = createAsyncThunk(
-  'brands/createBrand',
-  async (brandData: Omit<Brand, '_id'>) => {
-    const response = await fetch(API_ROUTES.CREATE_BRAND, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(brandData),
+  "brands/createBrand",
+  async (brandData: FormData) => {
+    // Log the FormData structure properly
+    console.log("Submitting Brand Data:");
+    Array.from(brandData.entries()).forEach(([key, value]) => {
+      if (value instanceof File) {
+        console.log(`${key}: File Name - ${value.name}, Type - ${value.type}, Size - ${value.size} bytes`);
+      } else {
+        console.log(`${key}:`, value);
+      }
     });
-    if (!response.ok) {
-      throw new Error('Failed to create brand');
+
+    try {
+      const response = await fetch(API_ROUTES.CREATE_BRAND, {
+        method: "POST",
+        body: brandData,
+      });
+
+      if (!response.ok) {
+        console.error("Error Response Status:", response.status);
+        console.error("Error Response Text:", await response.text());
+        throw new Error("Failed to create brand");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Request Failed:", error);
+      throw error;
     }
-    return await response.json();
   }
 );
+
 
 export const fetchAllBrands = createAsyncThunk(
   'brands/fetchAllBrands',
@@ -88,21 +105,18 @@ export const deleteBrand = createAsyncThunk(
 );
 
 export const updateBrand = createAsyncThunk(
-  'brands/updateBrand',
-  async ({ id, brandData }: { id: string; brandData: Partial<Brand> }) => {
+  "brands/updateBrand",
+  async ({ id, brandData }: { id: string; brandData: FormData }) => {
     const response = await fetch(API_ROUTES.UPDATE_BRAND(id), {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(brandData),
-    });
+      method: "PUT",
+      body: brandData,
+    })
     if (!response.ok) {
-      throw new Error('Failed to update brand');
+      throw new Error("Failed to update brand")
     }
-    return await response.json();
-  }
-);
+    return await response.json()
+  },
+)
 
 const brandsSlice = createSlice({
   name: 'brands',

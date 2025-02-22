@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
@@ -17,7 +19,6 @@ const BrandForm = () => {
 
   const [formData, setFormData] = useState<Partial<Brand>>({
     brandName: "",
-    brandLogo: "",
     brandDescription: "",
     brandCategory: "",
     contactEmail: "",
@@ -33,6 +34,8 @@ const BrandForm = () => {
     password: "",
   })
 
+  const [media, setMedia] = useState<File | null>(null)
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
 
@@ -45,11 +48,14 @@ const BrandForm = () => {
   useEffect(() => {
     if (currentBrand && brandId) {
       setFormData(currentBrand)
+      if (currentBrand.media) {
+        setMediaPreview(currentBrand.media)
+      }
     }
   }, [currentBrand, brandId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, files } = e.target as HTMLInputElement
+    const { name, value } = e.target
     if (name.startsWith("socialMediaLinks.")) {
       const socialMedia = name.split(".")[1]
       setFormData((prev) => ({
@@ -59,25 +65,48 @@ const BrandForm = () => {
           [socialMedia]: value,
         },
       }))
-    } else if (name === "brandLogo" && files && files[0]) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setFormData((prev) => ({ ...prev, [name]: event.target?.result as string }))
-      }
-      reader.readAsDataURL(files[0])
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setMedia(file)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setMediaPreview(event.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const formDataToSend = new FormData()
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "socialMediaLinks") {
+        Object.entries(value as Record<string, string>).forEach(([socialKey, socialValue]) => {
+          formDataToSend.append(`socialMediaLinks[${socialKey}]`, socialValue)
+        })
+      } else {
+        formDataToSend.append(key, value as string)
+      }
+    })
+
+    if (media) {
+      formDataToSend.append("media", media)
+    }
+console.log(formDataToSend)
     try {
       if (brandId) {
-        await dispatch(updateBrand({ id: brandId, brandData: formData })).unwrap()
+        await dispatch(updateBrand({ id: brandId, brandData: formDataToSend })).unwrap()
+       
         setModalMessage("Brand updated successfully")
       } else {
-        await dispatch(createBrand(formData as Omit<Brand, "_id">)).unwrap()
+        await dispatch(createBrand(formDataToSend)).unwrap()
         setModalMessage("Brand created successfully")
       }
       setIsModalOpen(true)
@@ -119,21 +148,21 @@ const BrandForm = () => {
 
           {/* Brand Logo */}
           <div>
-            <label htmlFor="brandLogo" className="block text-lg font-medium text-dark dark:text-white mb-2">
-              Logo
-            </label>
-            <input
-              type="file"
-              id="brandLogo"
-              name="brandLogo"
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300  bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              accept="image/*"
-            />
-            {formData.brandLogo && (
-              <img src={formData.brandLogo || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
-            )}
-          </div>
+          <label htmlFor="media" className="block text-lg font-medium text-dark dark:text-white mb-2">
+            Logo
+          </label>
+          <input
+            type="file"
+            id="media"
+            name="media"
+            onChange={handleFileChange}
+            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            accept="image/*"
+          />
+          {mediaPreview && (
+            <img src={mediaPreview || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
+          )}
+        </div>
 
           {/* Brand Description */}
           <div className="col-span-2">
