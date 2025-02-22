@@ -1,9 +1,12 @@
-"use client"
+"use client"; // Ensure this component is rendered on the client side
 
+import dynamic from "next/dynamic";  // Import dynamic from Next.js
 import { ApexOptions } from "apexcharts";
 import React from "react";
-import ReactApexChart from "react-apexcharts";
 import DefaultSelectOption from "../../components/SelectOption/DefaultSelectOption";
+
+// Dynamically import ReactApexChart to avoid SSR issues
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const ChartThree: React.FC = () => {
   const series = [65, 34, 12, 56];

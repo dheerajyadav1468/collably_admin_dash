@@ -1,7 +1,10 @@
-import { ApexOptions } from "apexcharts";
+import dynamic from "next/dynamic";
+import { ApexOptions } from "apexcharts"; 
 import React from "react";
-import ReactApexChart from "react-apexcharts";
 import DefaultSelectOption from "../../components/SelectOption/DefaultSelectOption";
+
+// Dynamically import ReactApexChart to avoid SSR issues
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const ChartOne: React.FC = () => {
   const series = [
@@ -79,10 +82,10 @@ const ChartOne: React.FC = () => {
     },
     tooltip: {
       fixed: {
-        enabled: !1,
+        enabled: false,
       },
       x: {
-        show: !1,
+        show: false,
       },
       y: {
         title: {
@@ -92,7 +95,7 @@ const ChartOne: React.FC = () => {
         },
       },
       marker: {
-        show: !1,
+        show: false,
       },
     },
     xaxis: {
