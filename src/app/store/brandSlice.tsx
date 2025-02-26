@@ -10,12 +10,7 @@ export interface Brand {
   contactEmail: string
   brandWebsite: string
   brandPhoneNumber: string
-  socialMediaLinks: {
-    facebook: string
-    twitter: string
-    instagram: string
-    linkedin: string
-  }
+ 
   gstNumber: string
   password?: string
 }

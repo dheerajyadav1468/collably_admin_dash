@@ -6,7 +6,7 @@ export const API_ROUTES = {
   GET_ALL_BRANDS: `${BASE_URL}/brands`,
   GET_BRAND: (id: string) => `${BASE_URL}/brand/${id}`,
   DELETE_BRAND: (id: string) => `${BASE_URL}/brand/${id}`,
-  UPDATE_BRAND: (id: string) => `${BASE_URL}/brandupdate/${id}`,
+  UPDATE_BRAND: (id: string) => `${BASE_URL}/brands/${id}`,
    
   // Product routes
   CREATE_PRODUCT: `${BASE_URL}/create/product`,
