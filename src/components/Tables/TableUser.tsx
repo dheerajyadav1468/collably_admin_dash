@@ -87,9 +87,9 @@ const UserTable = () => {
                   <button className="hover:text-primary" onClick={() => handleViewClick(user._id)}>
                     <Eye className="w-5 h-5" />
                   </button>
-                  <button className="hover:text-primary ml-3" onClick={() => handleEditClick(user._id)}>
+                  {/* <button className="hover:text-primary ml-3" onClick={() => handleEditClick(user._id)}>
                     <Edit className="w-5 h-5" />
-                  </button>
+                  </button> */}
                 </td>
               </tr>
             ))}
