@@ -13,7 +13,7 @@ const ProfileUser = () => {
   const router = useRouter()
   const userId = searchParams.get("id")
   const { currentUser, status, error } = useSelector((state: RootState) => state.users)
-
+console.log(currentUser)
   useEffect(() => {
     if (userId) {
       dispatch(fetchUser(userId))
@@ -35,12 +35,12 @@ const ProfileUser = () => {
       <div className="flex justify-between items-center mb-6">
       <h2 className="text-2xl font-bold">{currentUser.fullname}&apos;s Profile</h2>
 
-        <button
+        {/* <button
           onClick={handleEditClick}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
           Edit Profile
-        </button>
+        </button> */}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -61,7 +61,7 @@ const ProfileUser = () => {
             <strong>Gender:</strong> {currentUser.gender}
           </p>
           <p>
-            <strong>Mobile:</strong> {currentUser.mobile || "Not provided"}
+            <strong>Mobile:</strong> {currentUser.contactNumber || "Not provided"}
           </p>
           <p>
             <strong>Address:</strong> {currentUser.address || "Not provided"}
@@ -83,19 +83,29 @@ const ProfileUser = () => {
           </p>
         </div>
       </div>
-      <div className="mt-6">
-        <h4 className="text-lg font-semibold mb-2">Story</h4>
-        <p>{currentUser.story || "No story provided"}</p>
-      </div>
-      <div className="mt-6">
-        <h4 className="text-lg font-semibold mb-2">Social</h4>
-        <p>
-          <strong>Followers:</strong> {currentUser.followers.length}
-        </p>
-        <p>
-          <strong>Following:</strong> {currentUser.following.length}
-        </p>
-      </div>
+      <div className="mt-6 row"  style={{
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  }}>
+  {/* Story Section - Left Side */}
+  <div className="col-md-6">
+    <h4 className="text-lg font-semibold mb-2">Story</h4>
+    <p>{currentUser.story || "No story provided"}</p>
+  </div>
+
+  {/* Social Section - Right Side */}
+  <div className="col-md-6"  >
+    <h4 className="text-lg font-semibold mb-2">Social</h4>
+    <p>
+      <strong>Followers:</strong> {currentUser.followers?.length ?? 0}
+    </p>
+    <p>
+      <strong>Following:</strong> {currentUser.following?.length ?? 0}
+    </p>
+  </div>
+</div>
+
     </div>
   )
 }

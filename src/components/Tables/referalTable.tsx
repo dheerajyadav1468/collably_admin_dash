@@ -81,7 +81,7 @@ export default function ReferralTable() {
                 className={key === currentReferrals.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
               >
                 <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">
-                  {referral.userId.fullname}
+                  {referral.userId?.fullname}
                 </td>
                 <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
                   <a href={referral.referralLink} target="_blank" rel="noopener noreferrer">

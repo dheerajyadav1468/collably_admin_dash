@@ -9,7 +9,7 @@ export interface User {
   avatar: string
   role: string
   gender: string
-  mobile: string
+  contactNumber: string
   address: string
   story: string
   website: string
@@ -58,12 +58,34 @@ export const fetchAllUsers = createAsyncThunk("users/fetchAllUsers", async () =>
 })
 
 export const fetchUser = createAsyncThunk("users/fetchUser", async (id: string) => {
-  const response = await fetch(API_ROUTES.GET_USER(id))
+  const token = localStorage.getItem("token");
+  console.log("Retrieved Token:", token);
+
+  const url = API_ROUTES.GET_USER(id);
+  console.log("Fetching user from:", url);
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: token,
+    },
+  });
+
+  console.log("Response Status:", response.status);
+
   if (!response.ok) {
-    throw new Error("Failed to fetch user")
+    const errorText = await response.text();
+    console.error("Failed to fetch user:", response.status, errorText);
+    throw new Error("Failed to fetch user");
   }
-  return await response.json()
-})
+
+  const data = await response.json();
+  console.log("Fetched User Data:", data);
+
+  return data.user; // 🔹 Only return the `user` object
+});
+
+
+
 
 export const updateUser = createAsyncThunk(
   "users/updateUser",
