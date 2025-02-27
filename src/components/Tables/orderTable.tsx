@@ -36,7 +36,7 @@ export default function OrderTable() {
   const [productDetails, setProductDetails] = useState<{
     [key: string]: ProductDetails
   }>({})
-
+console.log(orders)
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     user: "",
@@ -194,7 +194,7 @@ export default function OrderTable() {
                 className={key === currentOrders.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
               >
                 <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">{order._id}</td>
-                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user.fullname}</td>
+                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user?.username}</td>
                 <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
                   {order.items.map((item, index) => {
                     const product = typeof item.product === "string" ? productDetails[item.product] : item.product
