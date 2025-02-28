@@ -88,7 +88,7 @@ const ProfileBrand = () => {
           </p>
         </div>
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <h3 className="mb-2 text-lg font-semibold">Social Media Links</h3>
         {currentBrand?.socialMediaLinks ? (
           <>
@@ -126,7 +126,7 @@ const ProfileBrand = () => {
         ) : (
           <p>No social media links available</p>
         )}
-      </div>
+      </div> */}
       <div className="mt-4">
         <h3 className="mb-2 text-lg font-semibold">Additional Information</h3>
         <p>
