@@ -203,7 +203,7 @@ export default function OrderDetails() {
       <div className="mb-6 flex items-center">
         <button onClick={() => router.back()} className="mr-4 flex items-center text-gray-600 hover:text-primary">
           <ArrowLeft className="mr-2 h-5 w-5" />
-          Back
+          
         </button>
         <h1 className="text-2xl font-bold md:text-3xl">Order Details</h1>
       </div>
@@ -213,7 +213,7 @@ export default function OrderDetails() {
         <div className="md:col-span-2">
           <div className="rounded-lg bg-white p-6 shadow-md dark:bg-gray-dark">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Order #{order._id.slice(-8)}</h2>
+              <h2 className="text-xl font-semibold">Order ID {order._id}</h2>
               <div className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
                 {order.orderStatus}
               </div>
