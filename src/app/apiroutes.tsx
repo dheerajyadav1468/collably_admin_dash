@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://13.233.199.3/api";
 
 export const API_ROUTES = {
   // Brand routes
