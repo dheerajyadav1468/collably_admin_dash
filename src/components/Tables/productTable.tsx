@@ -4,10 +4,12 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
-import { fetchAllProducts, deleteProduct, fetchBrandProducts } from "../../app/store/prductSlice"
+import { fetchAllProducts, deleteProduct, fetchBrandProducts, createProduct } from "../../app/store/prductSlice"
 import { fetchAllBrands } from "../../app/store/brandSlice"
 import Link from "next/link"
-import { Filter, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Filter, Plus, Search, ChevronLeft, ChevronRight, FileUp } from "lucide-react"
+import ImportExportModal from "../../components/Tables/ImportExportModal"
+import type { Product } from "../../app/store/prductSlice"
 
 const ProductsTable = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -30,6 +32,7 @@ const ProductsTable = () => {
   const [brandName, setBrandName] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 10
+  const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false)
 
   useEffect(() => {
     const userType = localStorage.getItem("userType")
@@ -49,8 +52,7 @@ const ProductsTable = () => {
   }, [dispatch])
 
   const handleViewClick = (productId: string) => {
-    router.push(`/profileProduct?id=${productId}`);
-
+    router.push(`/profileProduct?id=${productId}`)
   }
 
   const handleEditClick = (productId: string) => {
@@ -58,20 +60,18 @@ const ProductsTable = () => {
   }
 
   const handleDeleteClick = async (productId: string) => {
+    try {
+      await dispatch(deleteProduct(productId)).unwrap()
 
-      try {
-        await dispatch(deleteProduct(productId)).unwrap()
+      if (userType === "admin") {
+        dispatch(fetchAllProducts())
+      } else if (userType === "brand" && brandId) {
+        dispatch(fetchBrandProducts(brandId))
+      }
 
-        if (userType === "admin") {
-          dispatch(fetchAllProducts())
-        } else if (userType === "brand" && brandId) {
-          dispatch(fetchBrandProducts(brandId))
-        }
-
-        alert("Product deleted successfully")
-      } catch (error) {
-        alert("Failed to delete product")
-      
+      alert("Product deleted successfully")
+    } catch (error) {
+      alert("Failed to delete product")
     }
   }
 
@@ -107,13 +107,32 @@ const ProductsTable = () => {
 
   const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"]
 
-
   const indexOfLastProduct = currentPage * productsPerPage
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
-  
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+
+  const handleImportProducts = async (productsToImport: Partial<Product>[]) => {
+    try {
+      for (const productData of productsToImport) {
+        await dispatch(createProduct(productData)).unwrap()
+      }
+
+      alert(`Successfully imported ${productsToImport.length} products`)
+
+      if (userType === "admin") {
+        dispatch(fetchAllProducts())
+      } else if (userType === "brand" && brandId) {
+        dispatch(fetchBrandProducts(brandId))
+      }
+
+      setIsImportExportModalOpen(false)
+    } catch (error) {
+      alert("Failed to import products")
+      console.error("Error importing products:", error)
+    }
+  }
 
   return (
     <div className="p-4 bg-dark text-gray rounded-lg w-full">
@@ -121,6 +140,13 @@ const ProductsTable = () => {
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{userType === "admin" ? "All Products" : `${brandName}'s Products`}</h1>
           <div className="flex gap-2">
+            <button
+              onClick={() => setIsImportExportModalOpen(true)}
+              className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 mr-2"
+            >
+              <FileUp className="h-4 w-4" />
+              Import/Export
+            </button>
             <Link
               href="/productForm"
               className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -347,8 +373,16 @@ const ProductsTable = () => {
           </div>
         </div>
       )}
+      {/* Import/Export Modal */}
+      <ImportExportModal
+        isOpen={isImportExportModalOpen}
+        onClose={() => setIsImportExportModalOpen(false)}
+        products={products}
+        onImport={handleImportProducts}
+      />
     </div>
   )
 }
 
 export default ProductsTable
+

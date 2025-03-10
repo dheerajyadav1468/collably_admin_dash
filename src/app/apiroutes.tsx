@@ -27,6 +27,7 @@ export const API_ROUTES = {
   
   // Order routes
   GET_ALL_ORDERS: `${BASE_URL}/getall/orders`,
+  GET_ORDER: (id: string) => `${BASE_URL}/order/${id}`,
 
   // Auth routes
   ADMIN_LOGIN: `${BASE_URL}/admin_login`,

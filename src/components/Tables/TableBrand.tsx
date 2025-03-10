@@ -1,12 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Papa from 'papaparse';
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
-import { fetchAllBrands, deleteBrand } from "../../app/store/brandSlice"
+import { fetchAllBrands, deleteBrand, createBrand } from "../../app/store/brandSlice"
 import Link from "next/link"
-import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Search, ChevronLeft, ChevronRight, FileUp } from "lucide-react"
+import ImportExportModal from "../../components/Tables/ImportExportModal"
+import type { Brand } from "../../app/store/brandSlice"
 
 const TableBrand = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -16,6 +19,7 @@ const TableBrand = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const brandsPerPage = 10
+  const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false)
 
   useEffect(() => {
     dispatch(fetchAllBrands())
@@ -30,15 +34,45 @@ const TableBrand = () => {
   }
 
   const handleDeleteClick = async (brandId: string) => {
-   
-      try {
-        await dispatch(deleteBrand(brandId)).unwrap()
-        alert("Brand deleted successfully")
-      } catch (error) {
-        alert("Failed to delete brand")
-      
+    try {
+      await dispatch(deleteBrand(brandId)).unwrap()
+      alert("Brand deleted successfully")
+    } catch (error) {
+      alert("Failed to delete brand")
     }
   }
+
+  const handleImportBrands = async (brandsToImport: Omit<Brand, "_id">[]) => {
+    try {
+      console.log("Brands to import:", brandsToImport);  // Log the data
+      for (const brandData of brandsToImport) {
+        // Ensure brandData is structured as expected
+        console.log("Brand Data:", brandData);
+        await dispatch(createBrand(brandData)).unwrap();
+      }
+      alert(`Successfully imported ${brandsToImport.length} brands`);
+      dispatch(fetchAllBrands());
+      setIsImportExportModalOpen(false);
+    } catch (error: any) {
+      alert("Failed to import brands");
+      console.error("Error importing brands:", error?.message || error);
+    }
+  };
+  
+  
+
+const handleFileUpload = (file: File) => {
+  Papa.parse(file, {
+    complete: (result) => {
+      console.log("Parsed CSV:", result.data); // Verify parsed data
+      handleImportBrands(result.data);
+    },
+  });
+};
+
+  
+  
+  
 
   const filteredBrands = brands.filter(
     (brand) =>
@@ -57,6 +91,14 @@ const TableBrand = () => {
     <div className="rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
       <div className="mb-4 flex items-center justify-between">
         <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">Top Brands</h4>
+        <div className="flex gap-2">
+        <button
+          onClick={() => setIsImportExportModalOpen(true)}
+          className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 mr-2"
+        >
+          <FileUp className="h-4 w-4" />
+          Import/Export
+        </button>
         <Link
           href="/brandForm"
           className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -64,6 +106,7 @@ const TableBrand = () => {
           <Plus className="h-4 w-4" />
           Add Brand
         </Link>
+        </div>
       </div>
 
       <div className="relative mt-4 mb-6">
@@ -194,8 +237,16 @@ const TableBrand = () => {
           </button>
         </div>
       </div>
+      {/* Import/Export Modal */}
+      <ImportExportModal
+        isOpen={isImportExportModalOpen}
+        onClose={() => setIsImportExportModalOpen(false)}
+        brands={brands}
+        onImport={handleImportBrands}
+      />
     </div>
   )
 }
 
 export default TableBrand
+
