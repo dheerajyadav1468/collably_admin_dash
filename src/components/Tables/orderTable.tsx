@@ -96,7 +96,7 @@ console.log(orders)
   }
 
   const filteredOrders = (orders || []).filter((order: Order) => {
-    const matchesUser = !filters.user || order.user.fullname.toLowerCase().includes(filters.user.toLowerCase())
+    const matchesUser = !filters.user || order.user?.username.toLowerCase().includes(filters.user.toLowerCase())
     const matchesProduct =
       !filters.product ||
       order.items.some((item) => {
@@ -108,7 +108,7 @@ console.log(orders)
       })
     const matchesSearch =
       !searchTerm ||
-      order.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.items.some((item) => {
         const productName =
           typeof item.product === "string"
