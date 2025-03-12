@@ -34,7 +34,6 @@ const ProductsTable = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 10
 
-  // Import/Export Modal State
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"export" | "import">("export")
   const fileInputRef = useRef<HTMLInputElement>(null)
