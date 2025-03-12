@@ -1,15 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchAllProducts, deleteProduct, fetchBrandProducts, createProduct } from "../../app/store/prductSlice"
 import { fetchAllBrands } from "../../app/store/brandSlice"
 import Link from "next/link"
-import { Filter, Plus, Search, ChevronLeft, ChevronRight, FileUp } from "lucide-react"
-import ImportExportModal from "../../components/Tables/ImportExportModal"
-import type { Product } from "../../app/store/prductSlice"
+import { Filter, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import * as XLSX from "xlsx"
 
 const ProductsTable = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -32,7 +33,11 @@ const ProductsTable = () => {
   const [brandName, setBrandName] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 10
+
+  // Import/Export Modal State
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<"export" | "import">("export")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const userType = localStorage.getItem("userType")
@@ -94,6 +99,150 @@ const ProductsTable = () => {
     )
   })
 
+  // Helper function to get brand name from brand ID
+  const getBrandNameById = (brandId: string) => {
+    const brand = brands.find((b) => b._id === brandId)
+    return brand ? brand.brandName : "Unknown Brand"
+  }
+
+  // Helper function to get brand ID from brand name
+  const getBrandIdByName = (brandName: string) => {
+    const brand = brands.find((b) => b.brandName.toLowerCase() === brandName.toLowerCase())
+    return brand ? brand._id : ""
+  }
+
+  // Import/Export Functions
+  const handleExportToExcel = () => {
+    const workbook = XLSX.utils.book_new()
+
+    // Map products to a format suitable for export with brand name instead of ID
+    const productsForExport = filteredProducts.map((product) => ({
+      "Product Name": product.productname,
+      "Brand Name": getBrandNameById(product.brandId),
+      Description: product.description,
+      Price: product.price,
+      Quantity: product.quantity,
+      Category: product.category,
+      Status: product.status || "Draft",
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(productsForExport)
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Products")
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    saveAsExcelFile(excelBuffer, "products_export")
+
+    setIsImportExportModalOpen(false)
+    alert("Products have been exported to Excel")
+  }
+
+  const handleExportToCSV = () => {
+    const workbook = XLSX.utils.book_new()
+
+    // Map products to a format suitable for export with brand name instead of ID
+    const productsForExport = filteredProducts.map((product) => ({
+      "Product Name": product.productname,
+      "Brand Name": getBrandNameById(product.brandId),
+      Description: product.description,
+      Price: product.price,
+      Quantity: product.quantity,
+      Category: product.category,
+      Status: product.status || "Draft",
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(productsForExport)
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Products")
+
+    // Generate CSV file
+    const csvBuffer = XLSX.write(workbook, { bookType: "csv", type: "array" })
+    saveAsCSVFile(csvBuffer, "products_export")
+
+    setIsImportExportModalOpen(false)
+    alert("Products have been exported to CSV")
+  }
+
+  const saveAsExcelFile = (buffer: ArrayBuffer, fileName: string) => {
+    const data = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+    const url = window.URL.createObjectURL(data)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${fileName}.xlsx`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }
+
+  const saveAsCSVFile = (buffer: ArrayBuffer, fileName: string) => {
+    const data = new Blob([buffer], { type: "text/csv" })
+    const url = window.URL.createObjectURL(data)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${fileName}.csv`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer)
+        const workbook = XLSX.read(data, { type: "array" })
+
+        const firstSheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[firstSheetName]
+        const jsonData = XLSX.utils.sheet_to_json(worksheet)
+
+        // Process imported data
+        const importedProducts = jsonData.map((row: any) => {
+          // Get brand ID from brand name
+          const brandIdFromName = row["Brand Name"] ? getBrandIdByName(row["Brand Name"]) : ""
+          // Use the found brand ID or fallback to the logged-in brand ID
+          const resolvedBrandId = brandIdFromName || brandId || ""
+
+          return {
+            brandId: resolvedBrandId,
+            brandid: resolvedBrandId, // Include both brandId and brandid to match the Product interface
+            productname: row["Product Name"] || "",
+            description: row["Description"] || "",
+            price: Number(row["Price"]) || 0,
+            quantity: Number(row["Quantity"]) || 0,
+            category: row["Category"] || "",
+            status: row["Status"] || "Draft",
+          }
+        })
+
+        // Import each product
+        let successCount = 0
+        for (const product of importedProducts) {
+          try {
+            await dispatch(createProduct(product)).unwrap()
+            successCount++
+          } catch (error) {
+            console.error("Failed to import product:", product, error)
+          }
+        }
+
+        // Refresh product list
+        if (userType === "admin") {
+          dispatch(fetchAllProducts())
+        } else if (userType === "brand" && brandId) {
+          dispatch(fetchBrandProducts(brandId))
+        }
+
+        setIsImportExportModalOpen(false)
+        alert(`${successCount} out of ${importedProducts.length} products imported successfully`)
+      } catch (error) {
+        console.error("Error processing file:", error)
+        alert("There was an error processing the file")
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
   if (status === "loading") return <div>Loading...</div>
   if (status === "failed") return <div>Error: {error}</div>
 
@@ -142,9 +291,24 @@ const ProductsTable = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setIsImportExportModalOpen(true)}
-              className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 mr-2"
+              className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-              <FileUp className="h-4 w-4" />
+              <svg
+                className="h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
               Import/Export
             </button>
             <Link
@@ -373,13 +537,135 @@ const ProductsTable = () => {
           </div>
         </div>
       )}
-      {/* Import/Export Modal */}
-      <ImportExportModal
-        isOpen={isImportExportModalOpen}
-        onClose={() => setIsImportExportModalOpen(false)}
-        products={products}
-        onImport={handleImportProducts}
-      />
+
+      {/* Custom Import/Export Modal */}
+      {isImportExportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-dark rounded-lg shadow-lg w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-dark dark:text-white">Import/Export Products</h3>
+              <button onClick={() => setIsImportExportModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="mb-4">
+              <div className="flex border-b">
+                <button
+                  className={`py-2 px-4 ${activeTab === "export" ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
+                  onClick={() => setActiveTab("export")}
+                >
+                  Export
+                </button>
+                <button
+                  className={`py-2 px-4 ${activeTab === "import" ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
+                  onClick={() => setActiveTab("import")}
+                >
+                  Import
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === "export" ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Export your products to Excel or CSV format. This will export all products currently displayed in the
+                  table.
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleExportToExcel}
+                    className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Export to Excel
+                  </button>
+                  <button
+                    onClick={handleExportToCSV}
+                    className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Export to CSV
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Import products from Excel or CSV file. The file should have columns for Product Name, Brand Name,
+                  Description, Price, Quantity, Category, and Status.
+                </p>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload File</label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleFileUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 w-full justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
+                  </svg>
+                  Select File
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

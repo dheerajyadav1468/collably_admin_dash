@@ -68,10 +68,10 @@ export default function ReferralTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-stroke dark:border-dark-3">
-              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base">User</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Link</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Clicks</th>
-              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base">Created At</th>
+              <th className="px-2 pb-3.5 text-left text-sm font-medium uppercase xsm:text-base text-black dark:text-white">User</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base text-black dark:text-white">Link</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base text-black dark:text-white">Clicks</th>
+              <th className="px-2 pb-3.5 text-center text-sm font-medium uppercase xsm:text-base text-black dark:text-white">Created At</th>
             </tr>
           </thead>
           <tbody>

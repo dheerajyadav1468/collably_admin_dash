@@ -24,7 +24,7 @@ const BrandForm = () => {
     contactEmail: "",
     brandWebsite: "",
     brandPhoneNumber: "",
-   
+    
     gstNumber: "",
     password: "",
   })
@@ -53,13 +53,13 @@ const BrandForm = () => {
     const { name, value } = e.target
     if (name.startsWith("socialMediaLinks.")) {
       const socialMedia = name.split(".")[1]
-      setFormData((prev) => ({
-        ...prev,
-        socialMediaLinks: {
-          ...prev.socialMediaLinks,
-          [socialMedia]: value,
-        },
-      }))
+      // setFormData((prev) => ({
+      //   ...prev,
+      //   socialMediaLinks: {
+      //     ...prev.socialMediaLinks,
+      //     [socialMedia]: value,
+      //   },
+      // }))
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
@@ -81,15 +81,15 @@ const BrandForm = () => {
     e.preventDefault()
     const formDataToSend = new FormData()
 
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "socialMediaLinks") {
-        Object.entries(value as Record<string, string>).forEach(([socialKey, socialValue]) => {
-          formDataToSend.append(`socialMediaLinks[${socialKey}]`, socialValue)
-        })
-      } else {
-        formDataToSend.append(key, value as string)
-      }
-    })
+    // Object.entries(formData).forEach(([key, value]) => {
+    //   if (key === "socialMediaLinks") {
+    //     Object.entries(value as Record<string, string>).forEach(([socialKey, socialValue]) => {
+    //       formDataToSend.append(`socialMediaLinks[${socialKey}]`, socialValue)
+    //     })
+    //   } else {
+    //     formDataToSend.append(key, value as string)
+    //   }
+    // })
 
     if (media) {
       formDataToSend.append("media", media)

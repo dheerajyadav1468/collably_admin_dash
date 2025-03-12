@@ -10,6 +10,7 @@ import { API_ROUTES } from "../apiroutes"
 import { ArrowLeft, Package, User, CreditCard, Truck, Calendar, Clock } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand";
 
 interface OrderItem {
   product: string | null
@@ -146,17 +147,20 @@ export default function OrderDetails() {
 
   if (loading) {
     return (
+      <DefaultLayoutBrand>
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
           <p className="text-lg">Loading order details...</p>
         </div>
       </div>
+      </DefaultLayoutBrand>
     )
   }
 
   if (error) {
     return (
+      <DefaultLayoutBrand>
       <div className="flex h-screen items-center justify-center">
         <div className="max-w-md rounded-lg bg-red-50 p-6 text-center">
           <h2 className="mb-2 text-xl font-bold text-red-700">Error</h2>
@@ -169,11 +173,13 @@ export default function OrderDetails() {
           </button>
         </div>
       </div>
+          </DefaultLayoutBrand>
     )
   }
 
   if (!order) {
     return (
+      <DefaultLayoutBrand>
       <div className="flex h-screen items-center justify-center">
         <div className="max-w-md rounded-lg bg-yellow-50 p-6 text-center">
           <h2 className="mb-2 text-xl font-bold text-yellow-700">Order Not Found</h2>
@@ -186,15 +192,18 @@ export default function OrderDetails() {
           </button>
         </div>
       </div>
+      </DefaultLayoutBrand>
     )
   }
 
   return (
+        <DefaultLayoutBrand>
+    
     <div className="max-w-6xl mx-auto p-4 md:p-6">
       <div className="mb-6 flex items-center">
         <button onClick={() => router.back()} className="mr-4 flex items-center text-gray-600 hover:text-primary">
           <ArrowLeft className="mr-2 h-5 w-5" />
-          Back
+          
         </button>
         <h1 className="text-2xl font-bold md:text-3xl">Order Details</h1>
       </div>
@@ -204,7 +213,7 @@ export default function OrderDetails() {
         <div className="md:col-span-2">
           <div className="rounded-lg bg-white p-6 shadow-md dark:bg-gray-dark">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Order #{order._id.slice(-8)}</h2>
+              <h2 className="text-xl font-semibold">Order ID {order._id}</h2>
               <div className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
                 {order.orderStatus}
               </div>
@@ -412,6 +421,8 @@ export default function OrderDetails() {
         </div>
       </div>
     </div>
+        </DefaultLayoutBrand>
+    
   )
 }
 

@@ -20,7 +20,7 @@ const UserForm = () => {
     username: "",
     email: "",
     gender: "male",
-    mobile: "",
+    contactNumber: "",
     address: "",
     story: "",
     website: "",
@@ -39,7 +39,7 @@ const UserForm = () => {
         username: currentUser.username,
         email: currentUser.email,
         gender: currentUser.gender,
-        mobile: currentUser.mobile,
+        contactNumber: currentUser.contactNumber,
         address: currentUser.address,
         story: currentUser.story,
         website: currentUser.website,
@@ -75,7 +75,7 @@ const UserForm = () => {
   if (status === "failed") return <div>Error: {error}</div>
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-6xl p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6">{userId ? "Update User" : "Create User"}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -146,7 +146,7 @@ const UserForm = () => {
             type="tel"
             id="mobile"
             name="mobile"
-            value={formData.mobile}
+            value={formData.contactNumber}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />

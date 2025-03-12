@@ -1,15 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Papa from 'papaparse';
+import { useState, useEffect, useRef } from "react"
+import Papa from "papaparse"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchAllBrands, deleteBrand, createBrand } from "../../app/store/brandSlice"
 import Link from "next/link"
+import * as XLSX from "xlsx"
 import { Plus, Search, ChevronLeft, ChevronRight, FileUp } from "lucide-react"
-import ImportExportModal from "../../components/Tables/ImportExportModal"
-import type { Brand } from "../../app/store/brandSlice"
 
 const TableBrand = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -20,6 +19,8 @@ const TableBrand = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const brandsPerPage = 10
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<"export" | "import">("export")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     dispatch(fetchAllBrands())
@@ -42,37 +43,147 @@ const TableBrand = () => {
     }
   }
 
-  const handleImportBrands = async (brandsToImport: Omit<Brand, "_id">[]) => {
+  const handleImportBrands = async (brandsToImport: any[]) => {
     try {
-      console.log("Brands to import:", brandsToImport);  // Log the data
+      console.log("Brands to import:", brandsToImport)
+      let successCount = 0
+
       for (const brandData of brandsToImport) {
-        // Ensure brandData is structured as expected
-        console.log("Brand Data:", brandData);
-        await dispatch(createBrand(brandData)).unwrap();
+        // Create FormData for each brand
+        const formData = new FormData()
+
+        // Add each field to FormData
+        if (brandData["Brand Name"]) formData.append("brandName", brandData["Brand Name"])
+        if (brandData["Brand Category"]) formData.append("brandCategory", brandData["Brand Category"])
+        if (brandData["Contact Email"]) formData.append("contactEmail", brandData["Contact Email"])
+        if (brandData["Brand Website"]) formData.append("brandWebsite", brandData["Brand Website"])
+        if (brandData["Brand Phone Number"]) formData.append("brandPhoneNumber", brandData["Brand Phone Number"])
+        if (brandData["Brand Description"]) formData.append("brandDescription", brandData["Brand Description"])
+        if (brandData["GST Number"]) formData.append("gstNumber", brandData["GST Number"])
+
+        // Add a default password if required
+        formData.append("password", "defaultPassword123")
+
+        try {
+          await dispatch(createBrand(formData)).unwrap()
+          successCount++
+        } catch (error) {
+          console.error("Failed to import brand:", error)
+        }
       }
-      alert(`Successfully imported ${brandsToImport.length} brands`);
-      dispatch(fetchAllBrands());
-      setIsImportExportModalOpen(false);
+
+      alert(`Successfully imported ${successCount} out of ${brandsToImport.length} brands`)
+      dispatch(fetchAllBrands())
+      setIsImportExportModalOpen(false)
     } catch (error: any) {
-      alert("Failed to import brands");
-      console.error("Error importing brands:", error?.message || error);
+      alert("Failed to import brands")
+      console.error("Error importing brands:", error?.message || error)
     }
-  };
-  
-  
+  }
 
-const handleFileUpload = (file: File) => {
-  Papa.parse(file, {
-    complete: (result) => {
-      console.log("Parsed CSV:", result.data); // Verify parsed data
-      handleImportBrands(result.data);
-    },
-  });
-};
+  const handleFileUpload = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        if (file.name.endsWith(".csv")) {
+          Papa.parse(file, {
+            header: true,
+            complete: (results) => {
+              handleImportBrands(results.data)
+            },
+            error: (error) => {
+              console.error("Error parsing CSV:", error)
+              alert("Error parsing CSV file")
+            },
+          })
+        } else {
+          // Handle Excel files
+          const data = new Uint8Array(e.target?.result as ArrayBuffer)
+          const workbook = XLSX.read(data, { type: "array" })
 
-  
-  
-  
+          const firstSheetName = workbook.SheetNames[0]
+          const worksheet = workbook.Sheets[firstSheetName]
+          const jsonData = XLSX.utils.sheet_to_json(worksheet)
+
+          handleImportBrands(jsonData)
+        }
+      } catch (error) {
+        console.error("Error processing file:", error)
+        alert("There was an error processing the file")
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  const handleExportToExcel = () => {
+    const workbook = XLSX.utils.book_new()
+
+    // Map brands to a format suitable for export
+    const brandsForExport = filteredBrands.map((brand) => ({
+      "Brand Name": brand.brandName,
+      "Brand Category": brand.brandCategory,
+      "Contact Email": brand.contactEmail,
+      "Brand Website": brand.brandWebsite || "",
+      "Brand Phone Number": brand.brandPhoneNumber || "",
+      "Brand Description": brand.brandDescription || "",
+      "GST Number": brand.gstNumber || "",
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(brandsForExport)
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Brands")
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    saveAsExcelFile(excelBuffer, "brands_export")
+
+    setIsImportExportModalOpen(false)
+    alert("Brands have been exported to Excel")
+  }
+
+  const handleExportToCSV = () => {
+    const workbook = XLSX.utils.book_new()
+
+    // Map brands to a format suitable for export
+    const brandsForExport = filteredBrands.map((brand) => ({
+      "Brand Name": brand.brandName,
+      "Brand Category": brand.brandCategory,
+      "Contact Email": brand.contactEmail,
+      "Brand Website": brand.brandWebsite || "",
+      "Brand Phone Number": brand.brandPhoneNumber || "",
+      "Brand Description": brand.brandDescription || "",
+      "GST Number": brand.gstNumber || "",
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(brandsForExport)
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Brands")
+
+    // Generate CSV file
+    const csvBuffer = XLSX.write(workbook, { bookType: "csv", type: "array" })
+    saveAsCSVFile(csvBuffer, "brands_export")
+
+    setIsImportExportModalOpen(false)
+    alert("Brands have been exported to CSV")
+  }
+
+  const saveAsExcelFile = (buffer: ArrayBuffer, fileName: string) => {
+    const data = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+    const url = window.URL.createObjectURL(data)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${fileName}.xlsx`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }
+
+  const saveAsCSVFile = (buffer: ArrayBuffer, fileName: string) => {
+    const data = new Blob([buffer], { type: "text/csv" })
+    const url = window.URL.createObjectURL(data)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${fileName}.csv`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  }
 
   const filteredBrands = brands.filter(
     (brand) =>
@@ -92,20 +203,20 @@ const handleFileUpload = (file: File) => {
       <div className="mb-4 flex items-center justify-between">
         <h4 className="mb-5.5 text-body-2xlg font-bold text-dark dark:text-white">Top Brands</h4>
         <div className="flex gap-2">
-        <button
-          onClick={() => setIsImportExportModalOpen(true)}
-          className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 mr-2"
-        >
-          <FileUp className="h-4 w-4" />
-          Import/Export
-        </button>
-        <Link
-          href="/brandForm"
-          className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Add Brand
-        </Link>
+          <button
+            onClick={() => setIsImportExportModalOpen(true)}
+            className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 mr-2"
+          >
+            <FileUp className="h-4 w-4" />
+            Import/Export
+          </button>
+          <Link
+            href="/brandForm"
+            className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Add Brand
+          </Link>
         </div>
       </div>
 
@@ -237,13 +348,134 @@ const handleFileUpload = (file: File) => {
           </button>
         </div>
       </div>
-      {/* Import/Export Modal */}
-      <ImportExportModal
-        isOpen={isImportExportModalOpen}
-        onClose={() => setIsImportExportModalOpen(false)}
-        brands={brands}
-        onImport={handleImportBrands}
-      />
+      {/* Custom Import/Export Modal */}
+      {isImportExportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-dark rounded-lg shadow-lg w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-dark dark:text-white">Import/Export Brands</h3>
+              <button onClick={() => setIsImportExportModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="mb-4">
+              <div className="flex border-b">
+                <button
+                  className={`py-2 px-4 ${activeTab === "export" ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
+                  onClick={() => setActiveTab("export")}
+                >
+                  Export
+                </button>
+                <button
+                  className={`py-2 px-4 ${activeTab === "import" ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
+                  onClick={() => setActiveTab("import")}
+                >
+                  Import
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === "export" ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Export your brands to Excel or CSV format. This will export all brands currently displayed in the
+                  table.
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleExportToExcel}
+                    className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Export to Excel
+                  </button>
+                  <button
+                    onClick={handleExportToCSV}
+                    className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Export to CSV
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Import brands from Excel or CSV file. The file should have columns for Brand Name, Brand Category,
+                  Contact Email, etc.
+                </p>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload File</label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => e.target.files && e.target.files[0] && handleFileUpload(e.target.files[0])}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 w-full justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
+                  </svg>
+                  Select File
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
