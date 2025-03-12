@@ -470,10 +470,11 @@ const TableBrand = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Import brands from Excel or CSV file. The file should have columns for Brand Name, Brand Category,
-                  Contact Email, etc. Include a "Password" column to set passwords for each brand.
-                </p>
+             <p className="text-sm text-gray-500">
+  Import brands from Excel or CSV file. The file should have columns for Brand Name, Brand Category,
+  Contact Email, etc. Include a &quot;Password&quot; column to set passwords for each brand.
+</p>
+
                 <div className="space-y-2">
                   <button
                     onClick={handleDownloadTemplate}

@@ -359,10 +359,10 @@ export default function ImportProductsPage() {
               <p>2. Fill in your product data in the template.</p>
               <p>3. Upload the completed file using the form above.</p>
               <p>4. Review the preview to ensure your data looks correct.</p>
-              <p>5. Click "Import Products" to begin the import process.</p>
+              <p>5. Click &quot;Import Products&quot; to begin the import process.</p>
               <p className="text-gray-500 mt-4">
                 Note: For brand users, all imported products will be associated with your brand automatically. Admin
-                users can specify different brands in the "Brand Name" column.
+                users can specify different brands in the &quot;Brand Name&quot; column.
               </p>
             </div>
           </div>
