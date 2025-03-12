@@ -8,7 +8,7 @@ import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchAllBrands, deleteBrand, createBrand } from "../../app/store/brandSlice"
 import Link from "next/link"
 import * as XLSX from "xlsx"
-import { Plus, Search, ChevronLeft, ChevronRight, FileUp } from "lucide-react"
+import { Plus, Search, ChevronLeft, ChevronRight, FileUp, Download } from "lucide-react"
 
 const TableBrand = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -61,8 +61,12 @@ const TableBrand = () => {
         if (brandData["Brand Description"]) formData.append("brandDescription", brandData["Brand Description"])
         if (brandData["GST Number"]) formData.append("gstNumber", brandData["GST Number"])
 
-        // Add a default password if required
-        formData.append("password", "defaultPassword123")
+        // Add password from import file or use default if not provided
+        if (brandData["Password"]) {
+          formData.append("password", brandData["Password"])
+        } else {
+          formData.append("password", "defaultPassword123")
+        }
 
         try {
           await dispatch(createBrand(formData)).unwrap()
@@ -127,6 +131,7 @@ const TableBrand = () => {
       "Brand Phone Number": brand.brandPhoneNumber || "",
       "Brand Description": brand.brandDescription || "",
       "GST Number": brand.gstNumber || "",
+      Password: "password123", // Example password in the export template
     }))
 
     const worksheet = XLSX.utils.json_to_sheet(brandsForExport)
@@ -152,6 +157,7 @@ const TableBrand = () => {
       "Brand Phone Number": brand.brandPhoneNumber || "",
       "Brand Description": brand.brandDescription || "",
       "GST Number": brand.gstNumber || "",
+      Password: "password123", // Example password in the export template
     }))
 
     const worksheet = XLSX.utils.json_to_sheet(brandsForExport)
@@ -163,6 +169,33 @@ const TableBrand = () => {
 
     setIsImportExportModalOpen(false)
     alert("Brands have been exported to CSV")
+  }
+
+  const handleDownloadTemplate = () => {
+    const workbook = XLSX.utils.book_new()
+
+    // Create template with all required fields including password
+    const templateData = [
+      {
+        "Brand Name": "Example Brand",
+        "Brand Category": "Electronics",
+        "Contact Email": "contact@example.com",
+        "Brand Website": "https://example.com",
+        "Brand Phone Number": "1234567890",
+        "Brand Description": "Description of the brand",
+        "GST Number": "GST123456789",
+        Password: "password123", // Include password field in template
+      },
+    ]
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData)
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Template")
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    saveAsExcelFile(excelBuffer, "brand_import_template")
+
+    alert("Template has been downloaded")
   }
 
   const saveAsExcelFile = (buffer: ArrayBuffer, fileName: string) => {
@@ -439,9 +472,16 @@ const TableBrand = () => {
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
                   Import brands from Excel or CSV file. The file should have columns for Brand Name, Brand Category,
-                  Contact Email, etc.
+                  Contact Email, etc. Include a "Password" column to set passwords for each brand.
                 </p>
                 <div className="space-y-2">
+                  <button
+                    onClick={handleDownloadTemplate}
+                    className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 w-full justify-center mb-4"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download Template
+                  </button>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload File</label>
                   <input
                     type="file"
@@ -471,6 +511,22 @@ const TableBrand = () => {
                   </svg>
                   Select File
                 </button>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Import Format</h4>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-xs">
+                    <p className="mb-1">Your import file should include these columns:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Brand Name</li>
+                      <li>Brand Category</li>
+                      <li>Contact Email</li>
+                      <li>Brand Website</li>
+                      <li>Brand Phone Number</li>
+                      <li>Brand Description</li>
+                      <li>GST Number</li>
+                      <li>Password</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -481,3 +537,4 @@ const TableBrand = () => {
 }
 
 export default TableBrand
+
