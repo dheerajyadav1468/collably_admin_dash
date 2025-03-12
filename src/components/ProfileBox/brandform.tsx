@@ -24,7 +24,7 @@ const BrandForm = () => {
     contactEmail: "",
     brandWebsite: "",
     brandPhoneNumber: "",
-    
+
     gstNumber: "",
     password: "",
   })
@@ -51,18 +51,7 @@ const BrandForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    if (name.startsWith("socialMediaLinks.")) {
-      const socialMedia = name.split(".")[1]
-      // setFormData((prev) => ({
-      //   ...prev,
-      //   socialMediaLinks: {
-      //     ...prev.socialMediaLinks,
-      //     [socialMedia]: value,
-      //   },
-      // }))
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,24 +70,20 @@ const BrandForm = () => {
     e.preventDefault()
     const formDataToSend = new FormData()
 
-    // Object.entries(formData).forEach(([key, value]) => {
-    //   if (key === "socialMediaLinks") {
-    //     Object.entries(value as Record<string, string>).forEach(([socialKey, socialValue]) => {
-    //       formDataToSend.append(`socialMediaLinks[${socialKey}]`, socialValue)
-    //     })
-    //   } else {
-    //     formDataToSend.append(key, value as string)
-    //   }
-    // })
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key !== "socialMediaLinks" && value !== undefined && value !== null) {
+        formDataToSend.append(key, value as string)
+      }
+    })
 
     if (media) {
       formDataToSend.append("media", media)
     }
-console.log(formDataToSend)
+    console.log(formDataToSend)
     try {
       if (brandId) {
         await dispatch(updateBrand({ id: brandId, brandData: formDataToSend })).unwrap()
-       
+
         setModalMessage("Brand updated successfully")
       } else {
         await dispatch(createBrand(formDataToSend)).unwrap()
@@ -143,21 +128,21 @@ console.log(formDataToSend)
 
           {/* Brand Logo */}
           <div>
-          <label htmlFor="media" className="block text-lg font-medium text-dark dark:text-white mb-2">
-            Logo
-          </label>
-          <input
-            type="file"
-            id="media"
-            name="media"
-            onChange={handleFileChange}
-            className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            accept="image/*"
-          />
-          {mediaPreview && (
-            <img src={mediaPreview || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
-          )}
-        </div>
+            <label htmlFor="media" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Logo
+            </label>
+            <input
+              type="file"
+              id="media"
+              name="media"
+              onChange={handleFileChange}
+              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              accept="image/*"
+            />
+            {mediaPreview && (
+              <img src={mediaPreview || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
+            )}
+          </div>
 
           {/* Brand Description */}
           <div className="col-span-2">
@@ -248,7 +233,7 @@ console.log(formDataToSend)
             />
           </div>
 
-                   {/* GST Number */}
+          {/* GST Number */}
           <div>
             <label htmlFor="gstNumber" className="block text-lg font-medium text-dark dark:text-white mb-2">
               GST Number
