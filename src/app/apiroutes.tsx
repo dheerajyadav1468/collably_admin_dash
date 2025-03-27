@@ -36,5 +36,8 @@ export const API_ROUTES = {
   // Brand-specific routes
   GET_BRAND_PRODUCTS: `${BASE_URL}/brand/products`,
   GET_BRAND_ORDERS: (brandId: string) => `${BASE_URL}/brand/${brandId}/orders`,
+
+  
   GET_ALL_REFERRALS: `${BASE_URL}/referrals`,
+GET_BRAND_REFERRALS: (brandId: string) => `${BASE_URL}/referral/brand/${brandId}`,
 };
