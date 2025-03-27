@@ -481,4 +481,3 @@ const TableBrand = () => {
 }
 
 export default TableBrand
-
