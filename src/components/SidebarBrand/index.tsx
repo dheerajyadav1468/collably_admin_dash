@@ -217,7 +217,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Export Products",
-        route: "",
+        route: "/export",
       },
       {
         icon: (
@@ -244,7 +244,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Import Product",
-        route: "",
+        route: "/import",
       },
       {
         icon: (
