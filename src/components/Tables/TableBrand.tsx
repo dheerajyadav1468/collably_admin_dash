@@ -131,13 +131,12 @@ const TableBrand = () => {
       "Brand Phone Number": brand.brandPhoneNumber || "",
       "Brand Description": brand.brandDescription || "",
       "GST Number": brand.gstNumber || "",
-      Password: "password123", // Example password in the export template
+      Password: "password123", 
     }))
 
     const worksheet = XLSX.utils.json_to_sheet(brandsForExport)
     XLSX.utils.book_append_sheet(workbook, worksheet, "Brands")
 
-    // Generate Excel file
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
     saveAsExcelFile(excelBuffer, "brands_export")
 
@@ -148,7 +147,6 @@ const TableBrand = () => {
   const handleExportToCSV = () => {
     const workbook = XLSX.utils.book_new()
 
-    // Map brands to a format suitable for export
     const brandsForExport = filteredBrands.map((brand) => ({
       "Brand Name": brand.brandName,
       "Brand Category": brand.brandCategory,

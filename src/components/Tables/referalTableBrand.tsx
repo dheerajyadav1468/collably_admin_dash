@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
-import { fetchBrandReferrals } from "../../app/store/brandReferalSlice"
+import { fetchBrandReferrals, fetchAllBrandReferrals } from "../../app/store/brandReferalSlice"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 interface BrandReferral {
@@ -24,10 +24,18 @@ export default function BrandReferralTable() {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const referralsPerPage = 10
 
   useEffect(() => {
-    dispatch(fetchBrandReferrals())
+    const role = localStorage.getItem("userType")
+    setUserRole(role)
+
+    if (role === "admin") {
+      dispatch(fetchAllBrandReferrals())
+    } else {
+      dispatch(fetchBrandReferrals())
+    }
   }, [dispatch])
 
   const filteredReferrals = (referrals || []).filter((referral: BrandReferral) => {
@@ -41,7 +49,7 @@ export default function BrandReferralTable() {
   const indexOfLastReferral = currentPage * referralsPerPage
   const indexOfFirstReferral = indexOfLastReferral - referralsPerPage
   const currentReferrals = filteredReferrals.slice(indexOfFirstReferral, indexOfLastReferral)
-console.log(referrals)
+
   if (status === "loading") return <div>Loading...</div>
   if (status === "failed") return <div>Error: {error}</div>
 
@@ -49,7 +57,7 @@ console.log(referrals)
     <div className="w-full rounded-lg bg-dark p-4 text-gray">
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Brand Referrals</h1>
+          <h1 className="text-2xl font-bold">{userRole === "admin" ? "All Brand Referrals" : "Brand Referrals"}</h1>
         </div>
 
         <div className="relative mt-4">
@@ -78,27 +86,27 @@ console.log(referrals)
               </tr>
             </thead>
             <tbody>
-            {currentReferrals.map((referral: BrandReferral, key) => { return (
-    <tr
-      key={referral._id}
-      className={key === currentReferrals.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
-    >
-      <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">
-        {referral.userId?.fullname || "N/A"}
-      </td>
-      <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
-        <a href={referral.referralLink} target="_blank" rel="noopener noreferrer">
-          {referral.referralLink}
-        </a>
-      </td>
-      <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{referral.clicks}</td>
-      <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
-        {new Date(referral.createdAt).toLocaleDateString()}
-      </td>
-    </tr>
-  );
-})}
-
+              {currentReferrals.map((referral: BrandReferral, key) => {
+                return (
+                  <tr
+                    key={referral._id}
+                    className={key === currentReferrals.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
+                  >
+                    <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">
+                      {referral.userId?.fullname || "N/A"}
+                    </td>
+                    <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
+                      <a href={referral.referralLink} target="_blank" rel="noopener noreferrer">
+                        {referral.referralLink}
+                      </a>
+                    </td>
+                    <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{referral.clicks}</td>
+                    <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
+                      {new Date(referral.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         )}
@@ -135,3 +143,4 @@ console.log(referrals)
     </div>
   )
 }
+
