@@ -5,6 +5,8 @@ import usersReducer from "../store/userSlice";
 import ordersReducer from "../store/orderSlice";
 import referralReducer from "../store/referalSlice";
 import brandReferralsReducer from "../store/brandReferalSlice";
+import brandUsersReducer from "../store/brandsUserSlice";
+import userBrandReferralsReducer from "../store/userBrandSlice";
 export const store = configureStore({
   reducer: {
     brands: brandsReducer,
@@ -13,6 +15,8 @@ export const store = configureStore({
     orders: ordersReducer,
     referrals: referralReducer,
     brandReferrals: brandReferralsReducer,
+    brandUsers: brandUsersReducer,
+    userBrandReferrals: userBrandReferralsReducer,
   },
 });
 

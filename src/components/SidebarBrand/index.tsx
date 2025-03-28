@@ -125,7 +125,7 @@ const menuGroups = [
         route: "",
         children: [
           { label: "Link Tracking", route: "/affiliateBrand" },
-          { label: "Creators", route: "" },
+          { label: "Creators", route: "/users" },
         ],
       },
 
