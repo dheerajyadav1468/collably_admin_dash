@@ -122,7 +122,11 @@ const menuGroups = [
           </svg>
         ),
         label: "Affiliate",
-        route: "/affiliateBrand",
+        route: "",
+        children: [
+          { label: "Link Tracking", route: "/affiliateBrand" },
+          { label: "Creators", route: "/users" },
+        ],
       },
 
       {

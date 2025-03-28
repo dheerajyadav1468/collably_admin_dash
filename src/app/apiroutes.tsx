@@ -1,4 +1,4 @@
-const BASE_URL = "https://newapp.collably.in/api";
+const BASE_URL = "http://127.0.0.1:5000/api";
 
 export const API_ROUTES = {
   // Brand routes
@@ -40,4 +40,6 @@ export const API_ROUTES = {
   
   GET_ALL_REFERRALS: `${BASE_URL}/referrals`,
 GET_BRAND_REFERRALS: (brandId: string) => `${BASE_URL}/referral/brand/${brandId}`,
+GET_USERS_BY_BRAND: (brandId: string) => `${BASE_URL}/referrals/users/brand/${brandId}`,
+GET_USER_BRAND_REFERRALS: (userId: string, brandId: string) => `${BASE_URL}/referrals/${userId}/${brandId}`,
 };
