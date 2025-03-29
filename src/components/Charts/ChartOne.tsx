@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts"; 
 import React from "react";
@@ -7,13 +6,6 @@ import DefaultSelectOption from "../../components/SelectOption/DefaultSelectOpti
 // Dynamically import ReactApexChart to avoid SSR issues
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-=======
-import { ApexOptions } from "apexcharts";
-import React from "react";
-import ReactApexChart from "react-apexcharts";
-import DefaultSelectOption from "../../components/SelectOption/DefaultSelectOption";
-
->>>>>>> a58c3e101ff31165f33d11bced4b725a6204e859
 const ChartOne: React.FC = () => {
   const series = [
     {
@@ -90,17 +82,10 @@ const ChartOne: React.FC = () => {
     },
     tooltip: {
       fixed: {
-<<<<<<< HEAD
         enabled: false,
       },
       x: {
         show: false,
-=======
-        enabled: !1,
-      },
-      x: {
-        show: !1,
->>>>>>> a58c3e101ff31165f33d11bced4b725a6204e859
       },
       y: {
         title: {
@@ -110,11 +95,7 @@ const ChartOne: React.FC = () => {
         },
       },
       marker: {
-<<<<<<< HEAD
         show: false,
-=======
-        show: !1,
->>>>>>> a58c3e101ff31165f33d11bced4b725a6204e859
       },
     },
     xaxis: {

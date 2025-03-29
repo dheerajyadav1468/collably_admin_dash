@@ -261,27 +261,6 @@ const ProductsTable = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
-  const handleImportProducts = async (productsToImport: Partial<Product>[]) => {
-    try {
-      for (const productData of productsToImport) {
-        await dispatch(createProduct(productData)).unwrap()
-      }
-
-      alert(`Successfully imported ${productsToImport.length} products`)
-
-      if (userType === "admin") {
-        dispatch(fetchAllProducts())
-      } else if (userType === "brand" && brandId) {
-        dispatch(fetchBrandProducts(brandId))
-      }
-
-      setIsImportExportModalOpen(false)
-    } catch (error) {
-      alert("Failed to import products")
-      console.error("Error importing products:", error)
-    }
-  }
-
   return (
     <div className="p-4 bg-dark text-gray rounded-lg w-full">
       <div className="mb-6">
@@ -290,7 +269,7 @@ const ProductsTable = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setIsImportExportModalOpen(true)}
-              className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="flex items-center gap-2 rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
             >
               <svg
                 className="h-4 w-4"
@@ -542,7 +521,7 @@ const ProductsTable = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-dark rounded-lg shadow-lg w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-dark dark:text-white">Import/Export Products</h3>
+              <h3 className="text-xl font-semibold">Import/Export Products</h3>
               <button onClick={() => setIsImportExportModalOpen(false)} className="text-gray-500 hover:text-gray-700">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -670,4 +649,3 @@ const ProductsTable = () => {
 }
 
 export default ProductsTable
-

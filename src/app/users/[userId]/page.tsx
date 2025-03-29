@@ -66,7 +66,8 @@ export default function UserBrandReferralTable() {
           <button onClick={handleBackClick} className="mr-4 p-2 rounded-full hover:bg-gray-200" title="Back to users">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-2xl font-bold">{userName}'s Referral Links</h1>
+          <h1 className="text-2xl font-bold">{userName}&apos;s Referral Links</h1>
+
         </div>
 
         <div className="relative mt-4">
