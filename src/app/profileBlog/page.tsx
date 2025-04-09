@@ -24,7 +24,7 @@ const BlogProfile = () => {
 
   const handleEditClick = () => {
     if (blogId) {
-      router.push(`/blog-form?id=${blogId}`)
+      router.push(`/createBlog?id=${blogId}`)
     }
   }
 

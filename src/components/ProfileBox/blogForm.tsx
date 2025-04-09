@@ -47,7 +47,6 @@ const BlogForm = () => {
         category: currentBlog.category,
       });
 
-      // If the blog has an image URL, set it as preview
       if (currentBlog.image) {
         setImagePreview(currentBlog.image);
       }
