@@ -11,6 +11,7 @@ export interface Product {
   quantity: number
   category: string
   status?: "Published" | "Draft"
+  photoUrl?: string
 }
 
 interface ProductsState {
@@ -27,14 +28,13 @@ const initialState: ProductsState = {
   error: null,
 }
 
-export const createProduct = createAsyncThunk("products/createProduct", async (productData: Omit<Product, "_id">) => {
+export const createProduct = createAsyncThunk("products/createProduct", async (productData: FormData) => {
   const response = await fetch(API_ROUTES.CREATE_PRODUCT, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Authorization:  localStorage.getItem("token"),
+      Authorization: localStorage.getItem("token"),
     },
-    body: JSON.stringify(productData),
+    body: productData,
   })
   if (!response.ok) {
     throw new Error("Failed to create product")
@@ -89,14 +89,13 @@ export const deleteProduct = createAsyncThunk("products/deleteProduct", async (i
 
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({ id, productData }: { id: string; productData: Partial<Product> }) => {
+  async ({ id, productData }: { id: string; productData: FormData }) => {
     const response = await fetch(API_ROUTES.UPDATE_PRODUCT(id), {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: localStorage.getItem("token"),
       },
-      body: JSON.stringify(productData),
+      body: productData,
     })
     if (!response.ok) {
       throw new Error("Failed to update product")
@@ -194,3 +193,4 @@ const productsSlice = createSlice({
 
 export const { clearProducts } = productsSlice.actions
 export default productsSlice.reducer
+
