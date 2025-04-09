@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from "../../app/store/store"
 import { fetchBlog } from "../../app/store/blogSlice"
 import Link from "next/link"
 import Image from "next/image"
-import DefaultLayoutBrand from "../../components/Layouts/DefaultLayoutBrand"
+import DefaultLayout from "../../components/Layouts/DefaultLaout";
 
 const BlogProfile = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -33,7 +33,7 @@ const BlogProfile = () => {
   if (!currentBlog) return <div>No blog found</div>
 
   return (
-    <DefaultLayoutBrand>
+    <DefaultLayout>
       <div className="p-6 max-w-6xl bg-white dark:bg-gray-dark rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-dark dark:text-white">{currentBlog.title}</h2>
@@ -79,7 +79,7 @@ const BlogProfile = () => {
           </Link>
         </div>
       </div>
-    </DefaultLayoutBrand>
+    </DefaultLayout>
   )
 }
 
