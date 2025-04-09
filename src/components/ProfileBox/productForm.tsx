@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../app/store/store"
@@ -10,12 +12,14 @@ import type { Product } from "../../app/store/prductSlice"
 import type { Brand } from "../../app/store/brandSlice"
 import ProductModal from "./modalProduct"
 import Select from "react-select"
+import Image from "next/image"
 
 const ProductForm = () => {
   const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
   const searchParams = useSearchParams()
   const productId = searchParams.get("id")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     currentProduct,
@@ -34,6 +38,8 @@ const ProductForm = () => {
     status: "Draft",
   })
 
+  const [productPhoto, setProductPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -42,7 +48,7 @@ const ProductForm = () => {
   useEffect(() => {
     const role = localStorage.getItem("userType")
     setUserRole(role)
-    console.log(role);
+    console.log(role)
     const brandId = localStorage.getItem("brandId")
     setLoggedInBrandId(brandId)
 
@@ -67,6 +73,11 @@ const ProductForm = () => {
         category: currentProduct.category,
         status: currentProduct.status || "Draft",
       })
+
+      // If the product has a photo URL, set it as preview
+      if (currentProduct.photoUrl) {
+        setPhotoPreview(currentProduct.photoUrl)
+      }
     }
   }, [currentProduct, productId])
 
@@ -87,14 +98,52 @@ const ProductForm = () => {
     }
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setProductPhoto(file)
+
+      // Create a preview URL
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemovePhoto = () => {
+    setProductPhoto(null)
+    setPhotoPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Create FormData object
+    const productFormData = new FormData()
+
+    // Add all form fields to FormData
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        productFormData.append(key, value.toString())
+      }
+    })
+
+    // Add photo if selected
+    if (productPhoto) {
+      productFormData.append("productPhoto", productPhoto)
+    }
+
     try {
       if (productId) {
-        await dispatch(updateProduct({ id: productId, productData: formData })).unwrap()
+        await dispatch(updateProduct({ id: productId, productData: productFormData })).unwrap()
         setModalMessage("Product updated successfully")
       } else {
-        await dispatch(createProduct(formData as Omit<Product, "_id">)).unwrap()
+        await dispatch(createProduct(productFormData)).unwrap()
         setModalMessage("Product created successfully")
       }
       setIsModalOpen(true)
@@ -227,6 +276,7 @@ const ProductForm = () => {
               <option value="Home">Home</option>
               <option value="Beauty">Beauty</option>
               <option value="Sports">Sports</option>
+              <option value="Food">Food</option>
             </select>
           </div>
 
@@ -245,6 +295,43 @@ const ProductForm = () => {
               <option value="Draft">Draft</option>
               <option value="Published">Published</option>
             </select>
+          </div>
+
+          <div className="col-span-2">
+            <label htmlFor="productPhoto" className="block text-lg font-medium text-dark dark:text-white mb-2">
+              Product Photo
+            </label>
+            <div className="flex flex-col space-y-4">
+              {photoPreview && (
+                <div className="relative w-40 h-40">
+                  <Image
+                    src={photoPreview || "/placeholder.svg"}
+                    alt="Product preview"
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                id="productPhoto"
+                name="productPhoto"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="w-full p-3 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Upload a product image (JPG, PNG, GIF up to 5MB)
+              </p>
+            </div>
           </div>
         </div>
 

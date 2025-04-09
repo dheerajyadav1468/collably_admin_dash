@@ -112,36 +112,33 @@ export default function ImportProductsPage() {
         const worksheet = workbook.Sheets[firstSheetName]
         const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
-        // Process imported data
-        const importedProducts = jsonData.map((row: any) => {
-          // Get brand ID from brand name
-          const brandIdFromName = row["Brand Name"] ? getBrandIdByName(row["Brand Name"]) : ""
-          // Use the found brand ID or fallback to the logged-in brand ID
-          const resolvedBrandId = brandIdFromName || brandId || ""
-
-          return {
-            brandId: resolvedBrandId,
-            brandid: resolvedBrandId, // Include both brandId and brandid to match the Product interface
-            productname: row["Product Name"] || "",
-            description: row["Description"] || "",
-            price: Number(row["Price"]) || 0,
-            quantity: Number(row["Quantity"]) || 0,
-            category: row["Category"] || "",
-            status: row["Status"] || "Draft",
-          }
-        })
-
-        // Import each product
+        // Process and import each product
         let successCount = 0
         let failedCount = 0
 
-        for (const product of importedProducts) {
+        for (const row of jsonData) {
           try {
-            await dispatch(createProduct(product)).unwrap()
+            // Get brand ID from brand name
+            const brandIdFromName = row["Brand Name"] ? getBrandIdByName(row["Brand Name"]) : ""
+            // Use the found brand ID or fallback to the logged-in brand ID
+            const resolvedBrandId = brandIdFromName || brandId || ""
+
+            // Create FormData object for each product
+            const productFormData = new FormData()
+            productFormData.append("brandId", resolvedBrandId)
+            productFormData.append("brandid", resolvedBrandId)
+            productFormData.append("productname", row["Product Name"] || "")
+            productFormData.append("description", row["Description"] || "")
+            productFormData.append("price", (Number(row["Price"]) || 0).toString())
+            productFormData.append("quantity", (Number(row["Quantity"]) || 0).toString())
+            productFormData.append("category", row["Category"] || "")
+            productFormData.append("status", row["Status"] || "Draft")
+
+            await dispatch(createProduct(productFormData)).unwrap()
             successCount++
             setImportStatus((prev) => ({ ...prev, success: prev.success + 1 }))
           } catch (error) {
-            console.error("Failed to import product:", product, error)
+            console.error("Failed to import product:", row, error)
             failedCount++
             setImportStatus((prev) => ({ ...prev, failed: prev.failed + 1 }))
           }
@@ -371,4 +368,3 @@ export default function ImportProductsPage() {
     </div>
   )
 }
-

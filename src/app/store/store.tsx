@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import brandsReducer from "../store/brandSlice";
-import productsReducer from "../store/prductSlice"; // Fix typo: "prductSlice" -> "productSlice"
+import productsReducer from "../store/prductSlice"; 
 import usersReducer from "../store/userSlice";
 import ordersReducer from "../store/orderSlice";
 import referralReducer from "../store/referalSlice";
 import brandReferralsReducer from "../store/brandReferalSlice";
 import brandUsersReducer from "../store/brandsUserSlice";
 import userBrandReferralsReducer from "../store/userBrandSlice";
+import blogsReducer from "../store/blogSlice";
+
 export const store = configureStore({
   reducer: {
     brands: brandsReducer,
@@ -17,6 +19,7 @@ export const store = configureStore({
     brandReferrals: brandReferralsReducer,
     brandUsers: brandUsersReducer,
     userBrandReferrals: userBrandReferralsReducer,
+    blogs: blogsReducer,
   },
 });
 

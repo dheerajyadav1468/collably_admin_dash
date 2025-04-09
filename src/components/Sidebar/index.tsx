@@ -223,7 +223,7 @@ const menuGroups = [
         route: "",
         children: [
           { label: "Add Blogs", route: "/createBlog" },
-          { label: "All Blogs", route: "" },
+          { label: "All Blogs", route: "/blogTable" },
         ],
       },
          ],
