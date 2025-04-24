@@ -1,169 +1,208 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
 import { API_ROUTES } from "../apiroutes"
 
-export interface Blog {
+export interface Brand {
   _id: string
-  title: string
-  content: string
-  category: string
-  author: string
-  image?: string
-  createdAt?: string
-  updatedAt?: string
+  brandName: string
+  media?: string
+  brandDescription: string
+  brandCategory: string
+  contactEmail: string
+  brandWebsite: string
+  brandPhoneNumber: string
+  gstNumber: string
+  password?: string
 }
 
-interface BlogsState {
-  blogs: Blog[]
-  currentBlog: Blog | null
+interface BrandsState {
+  brands: Brand[]
+  currentBrand: Brand | null
   status: "idle" | "loading" | "succeeded" | "failed"
   error: string | null
 }
 
-const initialState: BlogsState = {
-  blogs: [],
-  currentBlog: null,
+const initialState: BrandsState = {
+  brands: [],
+  currentBrand: null,
   status: "idle",
   error: null,
 }
 
-export const createBlog = createAsyncThunk("blogs/createBlog", async (blogData: FormData) => {
-  const response = await fetch(API_ROUTES.UPLOAD_BLOG, {
-    method: "POST",
-    headers: {
-      Authorization: localStorage.getItem("token"),
-    },
-    body: blogData,
-  })
-  if (!response.ok) {
-    throw new Error("Failed to create blog")
+export const createBrand = createAsyncThunk("brands/createBrand", async (brandData: FormData, { rejectWithValue }) => {
+  try {
+    // Log the FormData structure properly
+    console.log("Submitting Brand Data:")
+    // Safely log FormData keys
+    const formDataKeys: string[] = []
+    brandData.forEach((value, key) => {
+      if (value instanceof File) {
+        formDataKeys.push(`${key} (File: ${value.name})`)
+      } else {
+        formDataKeys.push(key)
+      }
+    })
+    console.log("FormData keys:", formDataKeys)
+
+    const response = await fetch(API_ROUTES.CREATE_BRAND, {
+      method: "POST",
+      body: brandData, // Don't set Content-Type header with FormData
+    })
+
+    if (!response.ok) {
+      console.error("Error Response Status:", response.status)
+      const errorText = await response.text()
+      console.error("Error Response Text:", errorText)
+      return rejectWithValue("Failed to create brand")
+    }
+
+    return await response.json()
+  } catch (error: any) {
+    console.error("Request Failed:", error)
+    return rejectWithValue(error.message || "Failed to create brand")
   }
-  const data = await response.json()
-  return data.blog
 })
 
-export const fetchAllBlogs = createAsyncThunk("blogs/fetchAllBlogs", async () => {
-  const response = await fetch(API_ROUTES.VIEW_BLOGS)
-  if (!response.ok) {
-    throw new Error("Failed to fetch blogs")
+export const fetchAllBrands = createAsyncThunk("brands/fetchAllBrands", async (_, { rejectWithValue }) => {
+  try {
+    const response = await fetch(API_ROUTES.GET_ALL_BRANDS)
+    if (!response.ok) {
+      return rejectWithValue("Failed to fetch brands")
+    }
+    return await response.json()
+  } catch (error: any) {
+    return rejectWithValue(error.message || "Failed to fetch brands")
   }
-  const data = await response.json()
-  return data.blogs
 })
 
-export const fetchBlog = createAsyncThunk("blogs/fetchBlog", async (id: string) => {
-  const response = await fetch(API_ROUTES.GET_BLOG_BY_ID(id))
-  if (!response.ok) {
-    throw new Error("Failed to fetch blog")
+export const fetchBrand = createAsyncThunk("brands/fetchBrand", async (id: string, { rejectWithValue }) => {
+  try {
+    const response = await fetch(API_ROUTES.GET_BRAND(id))
+    if (!response.ok) {
+      return rejectWithValue("Failed to fetch brand")
+    }
+    return await response.json()
+  } catch (error: any) {
+    return rejectWithValue(error.message || "Failed to fetch brand")
   }
-  const data = await response.json()
-  return data.blog
 })
 
-export const deleteBlog = createAsyncThunk("blogs/deleteBlog", async (id: string) => {
-  const response = await fetch(API_ROUTES.DELETE_BLOG(id), {
-    method: "DELETE",
-    headers: {
-      Authorization: localStorage.getItem("token"),
-    },
-  })
-  if (!response.ok) {
-    throw new Error("Failed to delete blog")
-  }
-  return id
-})
-
-export const updateBlog = createAsyncThunk(
-  "blogs/updateBlog",
-  async ({ id, blogData }: { id: string; blogData: FormData }) => {
-    const response = await fetch(API_ROUTES.UPDATE_BLOG(id), {
-      method: "PUT",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-      body: blogData,
+export const deleteBrand = createAsyncThunk("brands/deleteBrand", async (id: string, { rejectWithValue }) => {
+  try {
+    const response = await fetch(API_ROUTES.DELETE_BRAND(id), {
+      method: "DELETE",
     })
     if (!response.ok) {
-      throw new Error("Failed to update blog")
+      return rejectWithValue("Failed to delete brand")
     }
-    const updatedBlog = await response.json()
-    return { id, updatedBlog: updatedBlog.blog }
+    return id
+  } catch (error: any) {
+    return rejectWithValue(error.message || "Failed to delete brand")
+  }
+})
+
+export const updateBrand = createAsyncThunk(
+  "brands/updateBrand",
+  async ({ id, brandData }: { id: string; brandData: FormData }, { rejectWithValue }) => {
+    try {
+      // Log the FormData structure properly
+      console.log("Updating Brand Data:")
+      // Safely log FormData keys
+      const formDataKeys: string[] = []
+      brandData.forEach((value, key) => {
+        if (value instanceof File) {
+          formDataKeys.push(`${key} (File: ${value.name})`)
+        } else {
+          formDataKeys.push(key)
+        }
+      })
+      console.log("FormData keys:", formDataKeys)
+
+      const response = await fetch(API_ROUTES.UPDATE_BRAND(id), {
+        method: "PUT",
+        body: brandData, // Don't set Content-Type header with FormData
+      })
+
+      if (!response.ok) {
+        console.error("Error Response Status:", response.status)
+        const errorText = await response.text()
+        console.error("Error Response Text:", errorText)
+        return rejectWithValue("Failed to update brand")
+      }
+
+      return await response.json()
+    } catch (error: any) {
+      console.error("Update Request Failed:", error)
+      return rejectWithValue(error.message || "Failed to update brand")
+    }
   },
 )
 
-const blogsSlice = createSlice({
-  name: "blogs",
+const brandsSlice = createSlice({
+  name: "brands",
   initialState,
-  reducers: {
-    clearBlogs: (state) => {
-      state.blogs = []
-      state.currentBlog = null
-      state.status = "idle"
-      state.error = null
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(createBlog.pending, (state) => {
+      .addCase(createBrand.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(createBlog.fulfilled, (state, action: PayloadAction<Blog>) => {
+      .addCase(createBrand.fulfilled, (state, action: PayloadAction<Brand>) => {
         state.status = "succeeded"
-        state.blogs.push(action.payload)
+        state.brands.push(action.payload)
       })
-      .addCase(createBlog.rejected, (state, action) => {
+      .addCase(createBrand.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message || "Failed to create blog"
+        state.error = (action.payload as string) || "Failed to create brand"
       })
-      .addCase(fetchAllBlogs.pending, (state) => {
+      .addCase(fetchAllBrands.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(fetchAllBlogs.fulfilled, (state, action: PayloadAction<Blog[]>) => {
+      .addCase(fetchAllBrands.fulfilled, (state, action: PayloadAction<Brand[]>) => {
         state.status = "succeeded"
-        state.blogs = action.payload
+        state.brands = action.payload
       })
-      .addCase(fetchAllBlogs.rejected, (state, action) => {
+      .addCase(fetchAllBrands.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message || "Failed to fetch blogs"
+        state.error = (action.payload as string) || "Failed to fetch brands"
       })
-      .addCase(fetchBlog.pending, (state) => {
+      .addCase(fetchBrand.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(fetchBlog.fulfilled, (state, action: PayloadAction<Blog>) => {
+      .addCase(fetchBrand.fulfilled, (state, action: PayloadAction<Brand>) => {
         state.status = "succeeded"
-        state.currentBlog = action.payload
+        state.currentBrand = action.payload
       })
-      .addCase(fetchBlog.rejected, (state, action) => {
+      .addCase(fetchBrand.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message || "Failed to fetch blog"
+        state.error = (action.payload as string) || "Failed to fetch brand"
       })
-      .addCase(deleteBlog.pending, (state) => {
+      .addCase(deleteBrand.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(deleteBlog.fulfilled, (state, action: PayloadAction<string>) => {
+      .addCase(deleteBrand.fulfilled, (state, action: PayloadAction<string>) => {
         state.status = "succeeded"
-        state.blogs = state.blogs.filter((blog) => blog._id !== action.payload)
+        state.brands = state.brands.filter((brand) => brand._id !== action.payload)
       })
-      .addCase(deleteBlog.rejected, (state, action) => {
+      .addCase(deleteBrand.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message || "Failed to delete blog"
+        state.error = (action.payload as string) || "Failed to delete brand"
       })
-      .addCase(updateBlog.pending, (state) => {
+      .addCase(updateBrand.pending, (state) => {
         state.status = "loading"
       })
-      .addCase(updateBlog.fulfilled, (state, action: PayloadAction<{ id: string; updatedBlog: Blog }>) => {
+      .addCase(updateBrand.fulfilled, (state, action: PayloadAction<Brand>) => {
         state.status = "succeeded"
-        const index = state.blogs.findIndex((blog) => blog._id === action.payload.id)
+        const index = state.brands.findIndex((brand) => brand._id === action.payload._id)
         if (index !== -1) {
-          state.blogs[index] = action.payload.updatedBlog
+          state.brands[index] = action.payload
         }
-        state.currentBlog = action.payload.updatedBlog
+        state.currentBrand = action.payload
       })
-      .addCase(updateBlog.rejected, (state, action) => {
+      .addCase(updateBrand.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message || "Failed to update blog"
+        state.error = (action.payload as string) || "Failed to update brand"
       })
   },
 })
 
-export const { clearBlogs } = blogsSlice.actions
-export default blogsSlice.reducer
+export default brandsSlice.reducer

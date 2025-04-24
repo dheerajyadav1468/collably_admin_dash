@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
@@ -24,13 +23,12 @@ const BrandForm = () => {
     contactEmail: "",
     brandWebsite: "",
     brandPhoneNumber: "",
-
     gstNumber: "",
     password: "",
   })
 
-  const [media, setMedia] = useState<File | null>(null)
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null)
+  const [brandLogo, setBrandLogo] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
 
@@ -42,9 +40,18 @@ const BrandForm = () => {
 
   useEffect(() => {
     if (currentBrand && brandId) {
-      setFormData(currentBrand)
+      setFormData({
+        brandName: currentBrand.brandName || "",
+        brandDescription: currentBrand.brandDescription || "",
+        brandCategory: currentBrand.brandCategory || "",
+        contactEmail: currentBrand.contactEmail || "",
+        brandWebsite: currentBrand.brandWebsite || "",
+        brandPhoneNumber: currentBrand.brandPhoneNumber || "",
+        gstNumber: currentBrand.gstNumber || "",
+      })
+
       if (currentBrand.media) {
-        setMediaPreview(currentBrand.media)
+        setLogoPreview(currentBrand.media)
       }
     }
   }, [currentBrand, brandId])
@@ -57,10 +64,10 @@ const BrandForm = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setMedia(file)
+      setBrandLogo(file)
       const reader = new FileReader()
       reader.onload = (event) => {
-        setMediaPreview(event.target?.result as string)
+        setLogoPreview(event.target?.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -68,29 +75,45 @@ const BrandForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Create a new FormData instance
     const formDataToSend = new FormData()
 
+    // Add all text fields to FormData
     Object.entries(formData).forEach(([key, value]) => {
-      if (key !== "socialMediaLinks" && value !== undefined && value !== null) {
-        formDataToSend.append(key, value as string)
+      if (value !== undefined && value !== null && value !== "") {
+        formDataToSend.append(key, value.toString())
       }
     })
 
-    if (media) {
-      formDataToSend.append("media", media)
+    // Add brandLogo file if it exists - IMPORTANT: Use "brandLogo" as the key, not "media"
+    if (brandLogo) {
+      formDataToSend.append("brandLogo", brandLogo)
+      console.log("Brand Logo added to FormData:", brandLogo.name, brandLogo.type, brandLogo.size)
     }
-    console.log(formDataToSend)
+
+    // Log FormData keys
+    const formDataKeys: string[] = []
+    formDataToSend.forEach((value, key) => {
+      if (value instanceof File) {
+        formDataKeys.push(`${key} (File: ${value.name})`)
+      } else {
+        formDataKeys.push(key)
+      }
+    })
+    console.log("FormData keys:", formDataKeys)
+
     try {
       if (brandId) {
         await dispatch(updateBrand({ id: brandId, brandData: formDataToSend })).unwrap()
-
         setModalMessage("Brand updated successfully")
       } else {
         await dispatch(createBrand(formDataToSend)).unwrap()
         setModalMessage("Brand created successfully")
       }
       setIsModalOpen(true)
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Form submission error:", error)
       alert(brandId ? "Failed to update brand" : "Failed to create brand")
     }
   }
@@ -107,7 +130,7 @@ const BrandForm = () => {
     <div className="max-w-6xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-dark space-y-6">
       <h4 className="text-3xl font-semibold text-dark dark:text-white mb-6">Brand Onboarding Form</h4>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-2">
           {/* Brand Name */}
           <div>
@@ -128,19 +151,25 @@ const BrandForm = () => {
 
           {/* Brand Logo */}
           <div>
-            <label htmlFor="media" className="block text-lg font-medium text-dark dark:text-white mb-2">
+            <label htmlFor="brandLogo" className="block text-lg font-medium text-dark dark:text-white mb-2">
               Logo
             </label>
             <input
               type="file"
-              id="media"
-              name="media"
+              id="brandLogo"
+              name="brandLogo" // Changed from "media" to "brandLogo"
               onChange={handleFileChange}
               className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               accept="image/*"
             />
-            {mediaPreview && (
-              <img src={mediaPreview || "/placeholder.svg"} alt="Brand Logo Preview" className="mt-2 max-w-xs" />
+            {logoPreview && (
+              <div className="mt-2">
+                <img
+                  src={logoPreview || "/placeholder.svg"}
+                  alt="Brand Logo Preview"
+                  className="max-w-xs max-h-32 object-contain"
+                />
+              </div>
             )}
           </div>
 
@@ -248,21 +277,25 @@ const BrandForm = () => {
               placeholder="Enter GST number"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter password"
-              required
-            />
-          </div>
+
+          {/* Password - only show for new brands */}
+          {!brandId && (
+            <div>
+              <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password || ""}
+                onChange={handleChange}
+                className="w-full p-4 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter password"
+                required={!brandId}
+              />
+            </div>
+          )}
         </div>
 
         {/* Submit Button */}
@@ -286,4 +319,3 @@ const BrandForm = () => {
 }
 
 export default BrandForm
-
