@@ -12,6 +12,7 @@ export interface Product {
   category: string
   status?: "Published" | "Draft"
   photoUrl?: string
+  photoUrls?: string[] // Support for multiple photos
 }
 
 interface ProductsState {
@@ -98,7 +99,9 @@ export const updateProduct = createAsyncThunk(
       body: productData,
     })
     if (!response.ok) {
-      throw new Error("Failed to update product")
+      const errorText = await response.text();
+      console.error("Update product error:", errorText);
+      throw new Error(`Failed to update product: ${errorText}`);
     }
     const updatedProduct = await response.json()
     return { id, updatedProduct }
@@ -193,4 +196,3 @@ const productsSlice = createSlice({
 
 export const { clearProducts } = productsSlice.actions
 export default productsSlice.reducer
-

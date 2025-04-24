@@ -38,8 +38,9 @@ const ProductForm = () => {
     status: "Draft",
   })
 
-  const [productPhoto, setProductPhoto] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [productPhotos, setProductPhotos] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
+  const MAX_PHOTOS = 5
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -74,9 +75,11 @@ const ProductForm = () => {
         status: currentProduct.status || "Draft",
       })
 
-      // If the product has a photo URL, set it as preview
-      if (currentProduct.photoUrl) {
-        setPhotoPreview(currentProduct.photoUrl)
+      // If the product has photo URLs, set them as previews
+      if (currentProduct.photoUrls && currentProduct.photoUrls.length > 0) {
+        setPhotoPreviews(currentProduct.photoUrls)
+      } else if (currentProduct.photoUrl) {
+        setPhotoPreviews([currentProduct.photoUrl])
       }
     }
   }, [currentProduct, productId])
@@ -99,25 +102,31 @@ const ProductForm = () => {
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setProductPhoto(file)
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files)
+      const totalPhotos = productPhotos.length + files.length
 
-      // Create a preview URL
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string)
+      if (totalPhotos > MAX_PHOTOS) {
+        alert(`You can only upload a maximum of ${MAX_PHOTOS} photos.`)
+        return
       }
-      reader.readAsDataURL(file)
+
+      setProductPhotos((prev) => [...prev, ...files])
+
+      // Create preview URLs for new files
+      files.forEach((file) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setPhotoPreviews((prev) => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+      })
     }
   }
 
-  const handleRemovePhoto = () => {
-    setProductPhoto(null)
-    setPhotoPreview(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
+  const handleRemovePhoto = (index: number) => {
+    setProductPhotos((prev) => prev.filter((_, i) => i !== index))
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -133,9 +142,11 @@ const ProductForm = () => {
       }
     })
 
-    // Add photo if selected
-    if (productPhoto) {
-      productFormData.append("productPhoto", productPhoto)
+    // Add photos if selected - use productPhoto as the key (not productPhotos)
+    if (productPhotos.length > 0) {
+      productPhotos.forEach((photo) => {
+        productFormData.append("productPhoto", photo)
+      })
     }
 
     try {
@@ -148,6 +159,7 @@ const ProductForm = () => {
       }
       setIsModalOpen(true)
     } catch (error) {
+      console.error("Error:", error)
       alert(productId ? "Failed to update product" : "Failed to create product")
     }
   }
@@ -299,38 +311,47 @@ const ProductForm = () => {
 
           <div className="col-span-2">
             <label htmlFor="productPhoto" className="block text-lg font-medium text-dark dark:text-white mb-2">
-              Product Photo
+              Product Photos (Max 5)
             </label>
             <div className="flex flex-col space-y-4">
-              {photoPreview && (
-                <div className="relative w-40 h-40">
-                  <Image
-                    src={photoPreview || "/placeholder.svg"}
-                    alt="Product preview"
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
-                  >
-                    ✕
-                  </button>
+              {photoPreviews.length > 0 && (
+                <div className="flex flex-wrap gap-4">
+                  {photoPreviews.map((preview, index) => (
+                    <div key={index} className="relative w-40 h-40">
+                      <Image
+                        src={preview || "/placeholder.svg"}
+                        alt={`Product preview ${index + 1}`}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePhoto(index)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
-              <input
-                type="file"
-                id="productPhoto"
-                name="productPhoto"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="w-full p-3 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Upload a product image (JPG, PNG, GIF up to 5MB)
-              </p>
+              {photoPreviews.length < MAX_PHOTOS && (
+                <>
+                  <input
+                    type="file"
+                    id="productPhoto"
+                    name="productPhoto"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    multiple
+                    className="w-full p-3 border-2 border-gray-300 bg-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Upload product images (JPG, PNG, GIF up to 5MB each) - {photoPreviews.length}/{MAX_PHOTOS} photos
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -354,4 +375,3 @@ const ProductForm = () => {
 }
 
 export default ProductForm
-
