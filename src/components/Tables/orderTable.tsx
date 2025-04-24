@@ -36,7 +36,7 @@ export default function OrderTable() {
   const [productDetails, setProductDetails] = useState<{
     [key: string]: ProductDetails
   }>({})
-console.log(orders)
+  console.log(orders)
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     user: "",
@@ -125,7 +125,81 @@ console.log(orders)
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
 
   if (status === "loading") return <div>Loading...</div>
-  if (status === "failed") return <div>Error: {error}</div>
+
+  // Updated error handling to show a user-friendly message
+  if (status === "failed" || !Array.isArray(orders) || orders.length === 0) {
+    return (
+      <div className="w-full rounded-lg bg-dark p-4 text-gray">
+        <div className="mb-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Orders</h1>
+            <div className="flex gap-2">
+              <button
+                onClick={toggleFilters}
+                className={`flex items-center gap-2 rounded px-4 py-2 hover:bg-gray-200 ${
+                  showFilters ? "bg-gray-200" : "bg-gray-100"
+                } text-gray-700`}
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <input
+                type="text"
+                value={filters.user}
+                onChange={(e) => handleFilterChange("user", e.target.value)}
+                placeholder="Filter by user"
+                className="w-full rounded-md border bg-black p-2 text-gray"
+              />
+              <input
+                type="text"
+                value={filters.product}
+                onChange={(e) => handleFilterChange("product", e.target.value)}
+                placeholder="Filter by product"
+                className="w-full rounded-md border bg-black p-2 text-gray"
+              />
+            </div>
+          )}
+
+          <div className="relative mt-4">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by user or product"
+              className="w-full rounded-md border bg-black p-2 pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-500" />
+          </div>
+        </div>
+
+        <div className="rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <svg
+              className="mb-4 h-16 w-16 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            <h3 className="mb-2 text-xl font-semibold text-gray-700 dark:text-gray-300">Oops! No orders for now...</h3>
+            <p className="text-gray-500 dark:text-gray-400">Check back later or create a new order.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full rounded-lg bg-dark p-4 text-gray">
@@ -194,7 +268,7 @@ console.log(orders)
                 className={key === currentOrders.length - 1 ? "" : "border-b border-stroke dark:border-dark-3"}
               >
                 <td className="px-2 py-4 text-left font-medium text-dark dark:text-white">{order._id}</td>
-                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user?.username}</td>
+                <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">{order.user?.fullname}</td>
                 <td className="px-2 py-4 text-center font-medium text-dark dark:text-white">
                   {order.items.map((item, index) => {
                     const product = typeof item.product === "string" ? productDetails[item.product] : item.product
@@ -266,4 +340,3 @@ console.log(orders)
     </div>
   )
 }
-
