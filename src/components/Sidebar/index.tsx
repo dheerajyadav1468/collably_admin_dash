@@ -67,9 +67,9 @@ const menuGroups = [
           </svg>
         ),
         label: "Creator",
-        route: "/creator",
+        route: "#",
         children: [
-          { label: "Add Creator", route: "/creatorForm" },
+          { label: "Add Creator", route: "#" },
         ],
       },
       {
@@ -107,7 +107,7 @@ const menuGroups = [
           { label: "KYC Pending", route: "#" },
           { label: "With Balance", route: "#" },
           { label: "All Users", route: "/userTable" },
-          { label: "Add Users", route: "/userForm" },
+          { label: "Add Users", route: "/creatorForm" },
           { label: "Notification to all", route: "#" },
         ],
       },
