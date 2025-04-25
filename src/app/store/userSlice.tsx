@@ -33,6 +33,23 @@ const initialState: UsersState = {
   error: null,
 }
 
+// New register user thunk that handles FormData
+export const registerUser = createAsyncThunk("users/registerUser", async (formData: FormData) => {
+  const response = await fetch("http://127.0.0.1:5000/api/register", {
+    method: "POST",
+    body: formData,
+    // Don't set Content-Type header when sending FormData
+    // The browser will set it automatically with the correct boundary
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null)
+    throw new Error(errorData?.message || "Failed to register user")
+  }
+
+  return await response.json()
+})
+
 export const createUser = createAsyncThunk("users/createUser", async (userData: Omit<User, "_id">) => {
   const response = await fetch(API_ROUTES.CREATE_USER, {
     method: "POST",
@@ -58,34 +75,31 @@ export const fetchAllUsers = createAsyncThunk("users/fetchAllUsers", async () =>
 })
 
 export const fetchUser = createAsyncThunk("users/fetchUser", async (id: string) => {
-  const token = localStorage.getItem("token");
-  console.log("Retrieved Token:", token);
+  const token = localStorage.getItem("token")
+  console.log("Retrieved Token:", token)
 
-  const url = API_ROUTES.GET_USER(id);
-  console.log("Fetching user from:", url);
+  const url = API_ROUTES.GET_USER(id)
+  console.log("Fetching user from:", url)
 
   const response = await fetch(url, {
     headers: {
       Authorization: token,
     },
-  });
+  })
 
-  console.log("Response Status:", response.status);
+  console.log("Response Status:", response.status)
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Failed to fetch user:", response.status, errorText);
-    throw new Error("Failed to fetch user");
+    const errorText = await response.text()
+    console.error("Failed to fetch user:", response.status, errorText)
+    throw new Error("Failed to fetch user")
   }
 
-  const data = await response.json();
-  console.log("Fetched User Data:", data);
+  const data = await response.json()
+  console.log("Fetched User Data:", data)
 
-  return data.user; // 🔹 Only return the `user` object
-});
-
-
-
+  return data.user // 🔹 Only return the `user` object
+})
 
 export const updateUser = createAsyncThunk(
   "users/updateUser",
@@ -130,6 +144,19 @@ const usersSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Register user cases
+      .addCase(registerUser.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(registerUser.fulfilled, (state, action: PayloadAction<User>) => {
+        state.status = "succeeded"
+        state.users.push(action.payload)
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.error.message || "Failed to register user"
+      })
+      // Create user cases
       .addCase(createUser.pending, (state) => {
         state.status = "loading"
       })
@@ -212,4 +239,3 @@ const usersSlice = createSlice({
 })
 
 export default usersSlice.reducer
-

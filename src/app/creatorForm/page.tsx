@@ -26,7 +26,7 @@ const TablesPage = () => {
     <DefaultLayout>
       <Breadcrumb pageName="Tables" />
       <div className="flex flex-col gap-10">
-      <CreatorOnboardingForm onSubmit={handleFormSubmit} />
+      <CreatorOnboardingForm  />
       </div>
     </DefaultLayout>
   );
