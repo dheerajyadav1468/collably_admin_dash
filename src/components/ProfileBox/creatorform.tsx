@@ -180,7 +180,7 @@ const RegisterForm: React.FC = () => {
           </div>
 
           {/* Password */}
-          <div className="relative">
+          {/* <div className="relative">
             <label htmlFor="password" className="block text-lg font-medium text-dark dark:text-white mb-2">
               Password
             </label>
@@ -204,7 +204,7 @@ const RegisterForm: React.FC = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Submit Button */}

@@ -35,7 +35,7 @@ const initialState: UsersState = {
 
 // New register user thunk that handles FormData
 export const registerUser = createAsyncThunk("users/registerUser", async (formData: FormData) => {
-  const response = await fetch("http://127.0.0.1:5000/api/register", {
+  const response = await fetch(API_ROUTES.CREATE_USER, {
     method: "POST",
     body: formData,
     // Don't set Content-Type header when sending FormData
