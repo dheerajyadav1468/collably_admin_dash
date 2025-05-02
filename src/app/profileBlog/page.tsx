@@ -74,7 +74,7 @@ const BlogProfile = () => {
         </div>
 
         <div className="mt-8 pt-4 border-t border-gray-200">
-          <Link href="/blog-table" className="text-blue-500 hover:text-blue-700">
+          <Link href="/blogTable" className="text-blue-500 hover:text-blue-700">
             ← Back to all blogs
           </Link>
         </div>

@@ -119,7 +119,7 @@ const BlogForm = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    router.push("/blog-table");
+    router.push("/blogTable");
   };
 
   if (blogStatus === "loading") return <div>Loading...</div>;
