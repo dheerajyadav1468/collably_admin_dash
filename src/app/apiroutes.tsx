@@ -1,4 +1,4 @@
-const BASE_URL = "https://newapp.collably.in/api";
+const BASE_URL = "https://collably.in/api";
 
 export const API_ROUTES = {
   // Brand routes
