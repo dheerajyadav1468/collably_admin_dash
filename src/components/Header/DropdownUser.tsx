@@ -26,19 +26,30 @@ const DropdownUser = () => {
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("fullname")
-    localStorage.removeItem("brandName")
-    setIsLoggedIn(false)
-    setUserRole(null)
-    setUserName(null)
-    if (userRole === "admin") {
-      router.push("/login")
-    } else if (userRole === "brand") {
-      router.push("/loginBrand")
+  const role = localStorage.getItem("userRole")
+  
+  localStorage.removeItem("isLoggedIn")
+  localStorage.removeItem("userRole")
+  localStorage.removeItem("fullname")
+  localStorage.removeItem("brandName")
+  localStorage.removeItem("userName")
+  
+  setIsLoggedIn(false)
+  setUserRole(null)
+  setUserName(null)
+  setDropdownOpen(false) 
+  
+ 
+  setTimeout(() => {
+    if (role === "admin") {
+      router.replace("/login")
+    } else if (role === "brand") {
+      router.replace("/loginBrand")
+    } else {
+      router.replace("/loginBrand") 
     }
-  }
+  }, 100) 
+}
 
   if (!isLoggedIn) {
     return null
