@@ -45,6 +45,7 @@ const LoginForm = () => {
         localStorage.setItem("isLoggedIn", "true")
         localStorage.setItem("userType", "admin")
         localStorage.setItem("userName", data.user.fullname)
+         localStorage.setItem("userRole", data.user.role)
         localStorage.setItem("token", data.access_token)
         console.log(data)
         console.log(data.user.fullname)

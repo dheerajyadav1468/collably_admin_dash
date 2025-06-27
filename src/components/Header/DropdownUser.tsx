@@ -16,6 +16,7 @@ const DropdownUser = () => {
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true"
     const role = localStorage.getItem("userRole")
+    console.log(role);
     const name = role === "admin" 
       ? localStorage.getItem("userName") 
       : localStorage.getItem("userName")
@@ -25,7 +26,7 @@ const DropdownUser = () => {
     setUserName(name)
   }, [])
 
-  const handleLogout = () => {
+   const handleLogout = () => {
   const role = localStorage.getItem("userRole")
   
   localStorage.removeItem("isLoggedIn")
@@ -39,7 +40,7 @@ const DropdownUser = () => {
   setUserName(null)
   setDropdownOpen(false) 
   
- 
+ console.log("role is : " , role);
   setTimeout(() => {
     if (role === "admin") {
       router.replace("/login")
@@ -50,6 +51,7 @@ const DropdownUser = () => {
     }
   }, 100) 
 }
+
 
   if (!isLoggedIn) {
     return null
