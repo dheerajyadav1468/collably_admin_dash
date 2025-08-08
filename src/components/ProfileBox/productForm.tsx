@@ -166,7 +166,7 @@ const ProductForm = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    router.push("/productTable")
+    router.push("/product-table")
   }
 
   if (productStatus === "loading" || brandsStatus === "loading") return <div>Loading...</div>

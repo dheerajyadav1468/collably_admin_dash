@@ -62,7 +62,7 @@ const UserTable = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Users</h1>
           <Link
-            href="/userForm"
+            href="/creatorForm"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             <UserPlus className="w-4 h-4" />

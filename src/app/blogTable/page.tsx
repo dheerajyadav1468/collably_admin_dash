@@ -85,7 +85,7 @@ const BlogTable = () => {
           <h1 className="text-2xl font-bold">All Blogs</h1>
           <div className="flex gap-2">
             <Link
-              href="/blog-form"
+              href="/createBlog"
               className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               <Plus className="h-4 w-4" />
